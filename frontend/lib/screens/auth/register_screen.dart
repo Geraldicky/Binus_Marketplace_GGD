@@ -23,6 +23,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
+  // Domain yang diizinkan (harus sama dengan backend SSO_ALLOWED_DOMAINS)
+  final _allowedDomains = ['@binus.ac.id', '@student.binus.ac.id', '@binus.edu'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear error saat halaman dibuka agar error dari halaman lain tidak muncul
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().clearError();
+    });
+  }
+
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -30,7 +42,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _studentIdCtrl.dispose();
     _passwordCtrl.dispose();
     _confirmPasswordCtrl.dispose();
+    // Clear error saat meninggalkan halaman ini
+    // supaya tidak bocor ke halaman lain (misal: login)
+    context.read<AuthProvider>().clearError();
     super.dispose();
+  }
+
+  bool _isValidBinusEmail(String email) {
+    return _allowedDomains.any((domain) => email.toLowerCase().endsWith(domain));
   }
 
   Future<void> _register() async {
@@ -108,11 +127,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           labelText: 'Nama Lengkap',
                           prefixIcon: Icon(Icons.person_outline_rounded),
                         ),
-                        validator: (v) => (v == null || v.isEmpty) ? 'Nama wajib diisi' : null,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Nama wajib diisi';
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
 
-                      // Email
+                      // Email — validasi domain BINUS yang benar
                       TextFormField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
@@ -122,8 +144,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           prefixIcon: Icon(Icons.email_outlined),
                         ),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Email wajib diisi';
-                          if (!v.contains('@binus')) return 'Harus menggunakan email BINUS';
+                          if (v == null || v.trim().isEmpty) return 'Email wajib diisi';
+                          if (!v.contains('@')) return 'Format email tidak valid';
+                          // Cek domain BINUS — fix dari validasi sebelumnya yang terlalu ketat
+                          if (!_isValidBinusEmail(v.trim())) {
+                            return 'Gunakan email BINUS\n(@binus.ac.id / @student.binus.ac.id)';
+                          }
                           return null;
                         },
                       ),
@@ -175,13 +201,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (v) {
+                          if (v == null || v.isEmpty) return 'Konfirmasi password wajib diisi';
                           if (v != _passwordCtrl.text) return 'Password tidak cocok';
                           return null;
                         },
                       ),
                       const SizedBox(height: 24),
 
-                      // Error
+                      // Error dari server
                       Consumer<AuthProvider>(
                         builder: (_, auth, __) {
                           if (auth.error == null) return const SizedBox.shrink();
@@ -197,7 +224,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 const Icon(Icons.error_outline, color: AppColors.error, size: 18),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(auth.error!, style: const TextStyle(color: AppColors.error, fontSize: 13)),
+                                  child: Text(
+                                    auth.error!,
+                                    style: const TextStyle(fontFamily: 'Poppins', color: AppColors.error, fontSize: 13),
+                                  ),
                                 ),
                               ],
                             ),
@@ -205,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                       ),
 
-                      // Register Button
+                      // Tombol Daftar
                       Consumer<AuthProvider>(
                         builder: (_, auth, __) => SizedBox(
                           width: double.infinity,
@@ -213,7 +243,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onPressed: auth.isLoading ? null : _register,
                             child: auth.isLoading
                                 ? const SizedBox(
-                                    width: 20, height: 20,
+                                    width: 20,
+                                    height: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                   )
                                 : const Text('Daftar'),

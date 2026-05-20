@@ -8,8 +8,8 @@ Aplikasi marketplace khusus mahasiswa BINUS untuk jual beli barang & jasa.
 
 ```
 binus-marketplace/
-├── backend/         → Express.js + Prisma + Socket.io
-└── frontend/        → Flutter (Dart)
+├── backend-ts/     → Express.js + TypeScript + Prisma + Socket.io
+└── frontend/       → Flutter (Dart)
 ```
 
 ---
@@ -25,7 +25,7 @@ Download dari: https://www.apachefriends.org/
 
 ### 2. Install dependensi
 ```bash
-cd backend
+cd backend-ts
 npm install
 ```
 
@@ -85,14 +85,7 @@ cd frontend
 flutter pub get
 ```
 
-### 3. Buat folder aset yang diperlukan
-```bash
-mkdir -p assets/images assets/icons assets/fonts
-```
-> **Catatan font:** Unduh font **Poppins** dari Google Fonts (https://fonts.google.com/specimen/Poppins) dan letakkan file `.ttf` di `assets/fonts/`.
-> File yang dibutuhkan: `Poppins-Regular.ttf`, `Poppins-Medium.ttf`, `Poppins-SemiBold.ttf`, `Poppins-Bold.ttf`
-
-### 4. Sesuaikan URL backend
+### 3. Sesuaikan URL backend
 Buka `lib/services/api_service.dart` dan ubah `baseUrl`:
 ```dart
 // Android Emulator → gunakan 10.0.2.2
@@ -111,7 +104,7 @@ Ubah juga URL Socket.io di `lib/screens/student/chat_room_screen.dart`:
 const socketUrl = 'http://10.0.2.2:3000'; // sesuaikan
 ```
 
-### 5. Jalankan aplikasi
+### 4. Jalankan aplikasi
 ```bash
 flutter run
 ```
@@ -215,5 +208,4 @@ flutter run
 
 1. **Jangan commit file `.env`** — sudah ada di `.gitignore`
 2. **Images**: Untuk prototype, field `images` disimpan sebagai JSON string kosong `"[]"`. Implementasi upload file perlu ditambahkan terpisah menggunakan `multer` di backend.
-3. **Font Poppins**: Wajib diunduh manual dari Google Fonts sebelum `flutter run`
-4. **Database**: Setiap kali mengubah `schema.prisma`, jalankan `npm run db:migrate` lagi.
+3. **Database**: Setiap kali mengubah `schema.prisma`, jalankan `npm run db:migrate` lagi.

@@ -30,6 +30,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
+<<<<<<< HEAD
       id: json['id'] ?? '',
       email: json['email'] ?? '',
       name: json['name'] ?? 'Unknown User',
@@ -41,6 +42,21 @@ class UserModel {
       isVerified: json['isVerified'] ?? false,
       avgRating: json['avgRating']?.toDouble(),
       reviewCount: json['reviewCount'],
+=======
+      id: json['id'] as String? ?? '',
+      // email bisa null kalau data dari seller di listing (partial select)
+      email: json['email'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      studentId: json['studentId'] as String?,
+      phone: json['phone'] as String?,
+      bio: json['bio'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
+      // role bisa null kalau data partial, default ke STUDENT
+      role: json['role'] as String? ?? 'STUDENT',
+      isVerified: json['isVerified'] as bool? ?? false,
+      avgRating: (json['avgRating'] as num?)?.toDouble(),
+      reviewCount: json['reviewCount'] as int?,
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     );
   }
 
@@ -62,6 +78,8 @@ class ListingModel {
   final List<String> images;
   final String status;
   final String? condition;
+  final int? stock;      // Stok awal
+  final int? stockLeft;  // Stok tersisa
   final String sellerId;
   final UserModel? seller;
   final DateTime createdAt;
@@ -76,6 +94,8 @@ class ListingModel {
     required this.images,
     required this.status,
     this.condition,
+    this.stock,
+    this.stockLeft,
     required this.sellerId,
     this.seller,
     required this.createdAt,
@@ -104,6 +124,7 @@ class ListingModel {
     }
 
     return ListingModel(
+<<<<<<< HEAD
       id: json['id'] ?? '',
       title: json['title'] ?? 'Produk Tanpa Judul',
       description: json['description'] ?? 'Tidak ada deskripsi',
@@ -115,6 +136,21 @@ class ListingModel {
       condition: json['condition'],
       sellerId: json['sellerId'] ?? '',
       seller: json['seller'] != null ? UserModel.fromJson(json['seller']) : null,
+=======
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      price: double.parse((json['price'] ?? 0).toString()),
+      category: json['category'] as String? ?? 'OTHER',
+      type: json['type'] as String? ?? 'PRODUCT',
+      images: parseImages(json['images']),
+      status: json['status'] as String? ?? 'PENDING',
+      condition: json['condition'] as String?,
+      stock: json['stock'] as int?,
+      stockLeft: json['stockLeft'] as int?,
+      sellerId: json['sellerId'] as String? ?? '',
+      seller: json['seller'] != null ? UserModel.fromJson(json['seller'] as Map<String, dynamic>) : null,
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     );
   }
@@ -141,6 +177,10 @@ class ListingModel {
       default: return 'Lainnya';
     }
   }
+
+  bool get hasStock => type == 'PRODUCT' && stock != null;
+  bool get isOutOfStock => hasStock && (stockLeft ?? 0) <= 0;
+  int get availableStock => stockLeft ?? 0;
 }
 
 // lib/models/transaction.model.dart
@@ -154,7 +194,13 @@ class TransactionModel {
   final UserModel? seller;
   final String status;
   final String? note;
-  final double price;
+  final double price;       // Harga satuan
+  final int quantity;       // Jumlah yang dibeli
+  final double totalPrice;  // Total = price x quantity
+  final double? commissionRate;
+  final double? commissionAmt;
+  final double? sellerReceives;
+  final bool isEscrowHeld;
   final DateTime createdAt;
   final ReviewModel? review;
 
@@ -169,37 +215,65 @@ class TransactionModel {
     required this.status,
     this.note,
     required this.price,
+    this.quantity = 1,
+    required this.totalPrice,
+    this.commissionRate,
+    this.commissionAmt,
+    this.sellerReceives,
+    this.isEscrowHeld = false,
     required this.createdAt,
     this.review,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    final price = double.parse((json['price'] ?? 0).toString());
+    final quantity = json['quantity'] as int? ?? 1;
+    final totalPrice = json['totalPrice'] != null
+        ? double.parse(json['totalPrice'].toString())
+        : price * quantity;
+
     return TransactionModel(
-      id: json['id'],
-      listingId: json['listingId'],
-      listing: json['listing'],
-      buyerId: json['buyerId'],
+      id: json['id'] as String? ?? '',
+      listingId: json['listingId'] as String? ?? '',
+      listing: json['listing'] as Map<String, dynamic>?,
+      buyerId: json['buyerId'] as String? ?? '',
       buyer: json['buyer'] != null ? UserModel.fromJson(json['buyer']) : null,
-      sellerId: json['sellerId'],
+      sellerId: json['sellerId'] as String? ?? '',
       seller: json['seller'] != null ? UserModel.fromJson(json['seller']) : null,
-      status: json['status'],
-      note: json['note'],
-      price: double.parse(json['price'].toString()),
-      createdAt: DateTime.parse(json['createdAt']),
+      status: json['status'] as String? ?? 'PENDING',
+      note: json['note'] as String?,
+      price: price,
+      quantity: quantity,
+      totalPrice: totalPrice,
+      commissionRate: json['commissionRate'] != null
+          ? double.parse(json['commissionRate'].toString()) : null,
+      commissionAmt: json['commissionAmt'] != null
+          ? double.parse(json['commissionAmt'].toString()) : null,
+      sellerReceives: json['sellerReceives'] != null
+          ? double.parse(json['sellerReceives'].toString()) : null,
+      isEscrowHeld: json['isEscrowHeld'] as bool? ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt']) : DateTime.now(),
       review: json['review'] != null ? ReviewModel.fromJson(json['review']) : null,
     );
   }
 
   String get statusLabel {
     switch (status) {
-      case 'PENDING': return 'Menunggu Konfirmasi';
-      case 'CONFIRMED': return 'Dikonfirmasi';
+      case 'PENDING': return 'Menunggu Pembayaran';
+      case 'PAID': return 'Sudah Dibayar';
+      case 'CONFIRMED': return 'Dikonfirmasi Seller';
       case 'COMPLETED': return 'Selesai';
       case 'CANCELLED': return 'Dibatalkan';
       default: return status;
     }
   }
 
+  bool get canPay => status == 'PENDING';
+  bool get buyerCanCancel => status == 'PENDING' || status == 'PAID';
+  bool get sellerCanConfirm => status == 'PAID';
+  bool get sellerCanComplete => status == 'CONFIRMED';
+  bool get sellerCanCancel => status == 'PAID' || status == 'CONFIRMED';
   bool get canReview => status == 'COMPLETED' && review == null;
 }
 
@@ -245,6 +319,7 @@ class MessageModel {
   final String content;
   final bool isRead;
   final DateTime createdAt;
+  final bool isPending; // true = pesan optimistic belum dikonfirmasi server
 
   MessageModel({
     required this.id,
@@ -254,10 +329,12 @@ class MessageModel {
     required this.content,
     required this.isRead,
     required this.createdAt,
+    this.isPending = false,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
+<<<<<<< HEAD
       id: json['id'] ?? '',
       chatRoomId: json['chatRoomId'] ?? json['roomId'] ?? '',
       senderId: json['senderId'] ?? '',
@@ -265,6 +342,16 @@ class MessageModel {
       content: json['content'] ?? '',
       isRead: json['isRead'] ?? false,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+=======
+      id: json['id'] as String? ?? '',
+      chatRoomId: json['chatRoomId'] as String? ?? '',
+      senderId: json['senderId'] as String? ?? '',
+      sender: json['sender'] != null ? UserModel.fromJson(json['sender'] as Map<String, dynamic>) : null,
+      content: json['content'] as String? ?? '',
+      isRead: json['isRead'] as bool? ?? false,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      isPending: false,
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     );
   }
 }

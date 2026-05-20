@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     const Text(
                       'BINUS',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -94,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     const Text(
                       'Marketplace',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        
                         fontSize: 18,
                         fontWeight: FontWeight.w300,
                         color: Colors.white,
@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     Text(
                       'Jual & Beli Khusus Mahasiswa BINUS',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        
                         fontSize: 13,
                         color: Colors.white.withOpacity(0.8),
                       ),

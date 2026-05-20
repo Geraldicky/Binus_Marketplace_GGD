@@ -8,20 +8,23 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 # Konfigurasi icon launcher
-# Jalankan: flutter pub run flutter_launcher_icons
+# Jalankan: dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icons/app_icon.png"  # ← Taruh file icon kamu di sini
+  image_path: "assets/icons/app_icon.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#1565C0"       # ← Warna background biru BINUS
-  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"  # ← Opsional untuk adaptive icon Android
+  adaptive_icon_background: "#1565C0"
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+
+  # Font (otomatis download, tidak perlu file .ttf manual)
+  google_fonts: ^6.2.1
 
   # HTTP & API
   http: ^1.2.0
@@ -65,14 +68,3 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-
-  # fonts:
-  #   - family: Poppins
-  #     fonts:
-  #       - asset: assets/fonts/Poppins-Regular.ttf
-  #       - asset: assets/fonts/Poppins-Medium.ttf
-  #         weight: 500
-  #       - asset: assets/fonts/Poppins-SemiBold.ttf
-  #         weight: 600
-  #       - asset: assets/fonts/Poppins-Bold.ttf
-  #         weight: 700

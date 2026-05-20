@@ -63,7 +63,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> with SingleTick
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
           indicatorWeight: 3,
-          labelStyle: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 14),
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           tabs: const [Tab(text: 'Pembelian'), Tab(text: 'Penjualan')],
         ),
       ),
@@ -129,7 +129,8 @@ class _TransactionCard extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'PENDING': return AppColors.warning;
-      case 'CONFIRMED': return AppColors.info;
+      case 'PAID': return AppColors.info;
+      case 'CONFIRMED': return AppColors.primary;
       case 'COMPLETED': return AppColors.success;
       case 'CANCELLED': return AppColors.grey500;
       default: return AppColors.grey500;
@@ -167,7 +168,7 @@ class _TransactionCard extends StatelessWidget {
                   ),
                   child: Text(
                     t.statusLabel,
-                    style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w600, color: _statusColor(t.status)),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _statusColor(t.status)),
                   ),
                 ),
               ],
@@ -175,7 +176,12 @@ class _TransactionCard extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Harga
-            Text(FormatUtils.currency(t.price), style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 15)),
+            Text(
+              t.quantity > 1
+                  ? '${FormatUtils.currency(t.totalPrice)} (${t.quantity}x)'
+                  : FormatUtils.currency(t.totalPrice),
+              style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 15),
+            ),
             const SizedBox(height: 8),
 
             // User info + tanggal
@@ -191,6 +197,22 @@ class _TransactionCard extends StatelessWidget {
                 Text(FormatUtils.timeAgo(t.createdAt), style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
+
+            // Hint bayar untuk buyer
+            if (t.canPay && isBuyer) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(color: AppColors.warningLight, borderRadius: BorderRadius.circular(8)),
+                child: Row(
+                  children: [
+                    const Icon(Icons.payment_rounded, size: 14, color: AppColors.warning),
+                    const SizedBox(width: 6),
+                    Text('Belum dibayar — tap untuk bayar', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.warning, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+            ],
 
             // Review hint
             if (t.canReview && isBuyer) ...[

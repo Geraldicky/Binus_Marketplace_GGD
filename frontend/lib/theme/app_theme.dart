@@ -1,16 +1,19 @@
 // lib/theme/app_theme.dart
 // Design System: Biru Terang + Putih, Clean & Modern
+// Font: Poppins via google_fonts (otomatis, tidak perlu file .ttf)
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // ── Primary (Biru BINUS) ──────────────────
-  static const primary = Color(0xFF1565C0);        // Biru utama
-  static const primaryLight = Color(0xFF42A5F5);   // Biru terang
-  static const primaryLighter = Color(0xFFE3F2FD); // Biru sangat terang (background)
-  static const primaryDark = Color(0xFF0D47A1);    // Biru gelap
+  static const primary = Color(0xFF1565C0);
+  static const primaryLight = Color(0xFF42A5F5);
+  static const primaryLighter = Color(0xFFE3F2FD);
+  static const primaryDark = Color(0xFF0D47A1);
 
   // ── Accent ────────────────────────────────
+<<<<<<< HEAD
   static const accent = Color(0xFF2196F3);         // Biru accent
   static const accentLight = Color(0xFFBBDEFB);   // Biru accent light
   
@@ -20,6 +23,10 @@ class AppColors {
   static const gradientOrange = Color(0xFFF97316);  // Orange vibrant
   static const gradientGreen = Color(0xFF10B981);   // Green vibrant
   static const gradientRed = Color(0xFFEF4444);     // Red vibrant
+=======
+  static const accent = Color(0xFF2196F3);
+  static const accentLight = Color(0xFFBBDEFB);
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
 
   // ── Status Colors ─────────────────────────
   static const success = Color(0xFF43A047);
@@ -33,7 +40,7 @@ class AppColors {
 
   // ── Neutral ───────────────────────────────
   static const white = Color(0xFFFFFFFF);
-  static const background = Color(0xFFF5F8FF);     // Putih kebiruan halus
+  static const background = Color(0xFFF5F8FF);
   static const surface = Color(0xFFFFFFFF);
   static const grey50 = Color(0xFFFAFAFA);
   static const grey100 = Color(0xFFF5F5F5);
@@ -55,9 +62,25 @@ class AppColors {
 
 class AppTheme {
   static ThemeData get lightTheme {
+    final poppinsTextTheme = GoogleFonts.poppinsTextTheme().copyWith(
+      displayLarge:  GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      displayMedium: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      headlineLarge: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      headlineMedium:GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+      headlineSmall: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+      titleLarge:    GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+      titleMedium:   GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+      bodyLarge:     GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
+      bodyMedium:    GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+      bodySmall:     GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+      labelLarge:    GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+      labelMedium:   GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
+      labelSmall:    GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500),
+    );
+
     return ThemeData(
       useMaterial3: true,
-      fontFamily: 'Poppins',
+      textTheme: poppinsTextTheme,
 
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
@@ -65,7 +88,6 @@ class AppTheme {
         onPrimary: AppColors.white,
         primaryContainer: AppColors.primaryLighter,
         secondary: AppColors.primaryLight,
-        background: AppColors.background,
         surface: AppColors.surface,
         error: AppColors.error,
       ),
@@ -73,29 +95,28 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
 
       // ── AppBar ──────────────────────────────
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
+        titleTextStyle: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.white,
         ),
-        iconTheme: IconThemeData(color: AppColors.white),
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
 
       // ── Bottom Nav Bar ──────────────────────
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.white,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.grey500,
         type: BottomNavigationBarType.fixed,
         elevation: 12,
-        selectedLabelStyle: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: TextStyle(fontFamily: 'Poppins', fontSize: 11),
+        selectedLabelStyle: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.poppins(fontSize: 11),
       ),
 
       // ── ElevatedButton ──────────────────────
@@ -106,11 +127,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -121,11 +138,7 @@ class AppTheme {
           side: const BorderSide(color: AppColors.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -133,11 +146,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -162,16 +171,8 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        hintStyle: const TextStyle(
-          fontFamily: 'Poppins',
-          color: AppColors.textHint,
-          fontSize: 14,
-        ),
-        labelStyle: const TextStyle(
-          fontFamily: 'Poppins',
-          color: AppColors.textSecondary,
-          fontSize: 14,
-        ),
+        hintStyle: GoogleFonts.poppins(color: AppColors.textHint, fontSize: 14),
+        labelStyle: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 14),
       ),
 
       // ── Card ────────────────────────────────
@@ -187,8 +188,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.primaryLighter,
         selectedColor: AppColors.primary,
-        labelStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        labelStyle: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.primary,
@@ -203,23 +203,6 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-
-      // ── Text Styles ─────────────────────────
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(fontFamily: 'Poppins', fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-        displayMedium: TextStyle(fontFamily: 'Poppins', fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-        headlineLarge: TextStyle(fontFamily: 'Poppins', fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-        headlineMedium: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-        headlineSmall: TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-        titleLarge: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-        titleMedium: TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-        bodyLarge: TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
-        bodyMedium: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
-        bodySmall: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
-        labelLarge: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600),
-        labelMedium: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w500),
-        labelSmall: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w500),
-      ),
     );
   }
 }
@@ -229,7 +212,6 @@ class AppTheme {
 // ─────────────────────────────────────────────
 
 class AppDecorations {
-  /// Card putih dengan shadow biru halus
   static BoxDecoration get card => BoxDecoration(
     color: AppColors.white,
     borderRadius: BorderRadius.circular(16),
@@ -242,7 +224,6 @@ class AppDecorations {
     ],
   );
 
-  /// Container biru gradient untuk header
   static BoxDecoration get blueGradient => const BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topLeft,
@@ -260,7 +241,6 @@ class AppDecorations {
     ),
   );
 
-  /// Badge status listing
   static BoxDecoration statusBadge(Color color) => BoxDecoration(
     color: color.withOpacity(0.12),
     borderRadius: BorderRadius.circular(20),

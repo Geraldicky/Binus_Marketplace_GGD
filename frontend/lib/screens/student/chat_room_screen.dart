@@ -50,13 +50,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     try {
       final res = await ApiService.getRoomMessages(widget.roomId);
       final data = res['data'] as List;
-      setState(() {
-        _messages = data.map((e) => MessageModel.fromJson(e)).toList();
-        _isLoading = false;
-      });
-      _scrollToBottom();
-    } catch (_) {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _messages = data.map((e) => MessageModel.fromJson(e as Map<String, dynamic>)).toList();
+          _isLoading = false;
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -64,18 +66,31 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final token = await ApiService.getToken();
     if (token == null) return;
 
-    // Ambil base URL tanpa /api
+    // Gunakan IP yang sama dengan baseUrl API
+    // Untuk Android emulator: 10.0.2.2, untuk device fisik: IP komputer
     const socketUrl = 'http://10.0.2.2:3000';
 
-    _socket = IO.io(socketUrl, IO.OptionBuilder()
-        .setTransports(['websocket'])
-        .setAuth({'token': token})
-        .build());
+    _socket = IO.io(
+      socketUrl,
+      IO.OptionBuilder()
+          // PENTING: gunakan ['polling', 'websocket'] bukan hanya ['websocket']
+          // Android emulator sering gagal kalau langsung websocket
+          .setTransports(['polling', 'websocket'])
+          .setAuth({'token': token})
+          .enableAutoConnect()
+          .enableReconnection()
+          .setReconnectionAttempts(5)
+          .setReconnectionDelay(2000)
+          .build(),
+    );
 
     _socket!.onConnect((_) {
+      debugPrint('✅ Socket connected');
+      // Join room setelah connect
       _socket!.emit('join_room', widget.roomId);
     });
 
+<<<<<<< HEAD
     _socket!.on('new_message', (data) {
       final msg = MessageModel.fromJson(Map<String, dynamic>.from(data));
       setState(() {
@@ -88,20 +103,57 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         }
       });
       _scrollToBottom();
+=======
+    _socket!.onConnectError((err) {
+      debugPrint('❌ Socket connect error: $err');
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     });
 
-    _socket!.on('user_typing', (data) {
-      final userId = data['userId'];
-      if (userId != _myId) {
-        setState(() => _otherTyping = data['isTyping']);
+    _socket!.onError((err) {
+      debugPrint('❌ Socket error: $err');
+    });
+
+    _socket!.onDisconnect((_) {
+      debugPrint('⚠️ Socket disconnected');
+    });
+
+    _socket!.on('new_message', (data) {
+      try {
+        final msg = MessageModel.fromJson(Map<String, dynamic>.from(data as Map));
+        if (mounted) {
+          setState(() {
+            // Hindari duplikat pesan
+            if (!_messages.any((m) => m.id == msg.id)) {
+              _messages.add(msg);
+            }
+          });
+          _scrollToBottom();
+        }
+      } catch (e) {
+        debugPrint('❌ Error parsing message: $e');
       }
     });
 
-    _socket!.onDisconnect((_) {});
+    _socket!.on('user_typing', (data) {
+      try {
+        final userId = (data as Map)['userId'];
+        if (userId != _myId && mounted) {
+          setState(() => _otherTyping = data['isTyping'] as bool? ?? false);
+        }
+      } catch (_) {}
+    });
+
+    _socket!.on('error', (data) {
+      debugPrint('❌ Socket server error: $data');
+    });
+
+    // Connect secara eksplisit
+    _socket!.connect();
   }
 
   void _sendMessage() {
     final content = _msgCtrl.text.trim();
+<<<<<<< HEAD
     if (content.isEmpty || _socket == null || _myId == null) return;
 
     // Optimistic update - tambah langsung ke list
@@ -119,8 +171,41 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
     // Emit ke server
     _socket!.emit('send_message', {'roomId': widget.roomId, 'content': content});
+=======
+    if (content.isEmpty) return;
+
+    if (_socket == null || !(_socket!.connected)) {
+      // Jika socket belum connect, coba reconnect dulu
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Menghubungkan ke server... Coba lagi sebentar'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _socket?.connect();
+      return;
+    }
+
+    // Optimistic UI: tampilkan pesan langsung di UI sebelum konfirmasi server
+    final optimisticMsg = MessageModel(
+      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+      chatRoomId: widget.roomId,
+      senderId: _myId ?? '',
+      sender: null,
+      content: content,
+      isRead: false,
+      createdAt: DateTime.now(),
+      isPending: true, // flag sementara
+    );
+
+    setState(() => _messages.add(optimisticMsg));
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     _msgCtrl.clear();
     _stopTyping();
+    _scrollToBottom();
+
+    // Kirim ke server via socket
+    _socket!.emit('send_message', {'roomId': widget.roomId, 'content': content});
   }
 
   void _onTyping(String value) {
@@ -162,16 +247,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   ? ClipOval(child: Image.network(widget.otherUser.avatarUrl!))
                   : Text(
                       widget.otherUser.name[0].toUpperCase(),
-                      style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: AppColors.primary),
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary),
                     ),
             ),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.otherUser.name, style: const TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.w600)),
+                Text(widget.otherUser.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 if (_otherTyping)
-                  const Text('sedang mengetik...', style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.white70)),
+                  const Text('sedang mengetik...', style: TextStyle(fontSize: 11, color: Colors.white70)),
               ],
             ),
           ],
@@ -298,7 +383,10 @@ class _MessageBubble extends StatelessWidget {
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isMe ? AppColors.primary : AppColors.white,
+          // Pesan pending tampil sedikit transparan
+          color: isMe
+              ? (message.isPending ? AppColors.primaryLight.withOpacity(0.8) : AppColors.primary)
+              : AppColors.white,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -315,9 +403,22 @@ class _MessageBubble extends StatelessWidget {
               style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: isMe ? Colors.white : AppColors.textPrimary),
             ),
             const SizedBox(height: 4),
-            Text(
-              FormatUtils.time(message.createdAt),
-              style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: isMe ? Colors.white60 : AppColors.textHint),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  FormatUtils.time(message.createdAt),
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: isMe ? Colors.white60 : AppColors.textHint),
+                ),
+                if (isMe) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    message.isPending ? Icons.access_time_rounded : Icons.done_rounded,
+                    size: 11,
+                    color: Colors.white60,
+                  ),
+                ],
+              ],
             ),
           ],
         ),

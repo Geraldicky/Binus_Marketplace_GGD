@@ -34,6 +34,7 @@ async function main(): Promise<void> {
       role: 'STUDENT',
       isVerified: true,
       bio: 'Mahasiswa teknik informatika semester 5',
+      balance: 5000000, // Saldo awal simulasi Rp 5.000.000
     },
   });
 
@@ -47,6 +48,7 @@ async function main(): Promise<void> {
       studentId: '2440005678',
       role: 'STUDENT',
       isVerified: true,
+      balance: 5000000, // Saldo awal simulasi Rp 5.000.000
     },
   });
 
@@ -61,6 +63,8 @@ async function main(): Promise<void> {
       status: 'ACTIVE',
       sellerId: student1.id,
       images: '[]',
+      stock: 3,
+      stockLeft: 3,
     },
   });
 
@@ -74,6 +78,7 @@ async function main(): Promise<void> {
       status: 'ACTIVE',
       sellerId: student1.id,
       images: '[]',
+      // Jasa tidak punya stock
     },
   });
 
@@ -88,6 +93,8 @@ async function main(): Promise<void> {
       status: 'PENDING',
       sellerId: student2.id,
       images: '[]',
+      stock: 5,
+      stockLeft: 5,
     },
   });
 

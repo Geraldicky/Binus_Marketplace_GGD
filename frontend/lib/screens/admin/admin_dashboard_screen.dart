@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/format_utils.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -71,10 +72,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Selamat datang,', style: TextStyle(fontFamily: 'Poppins', color: Colors.white70, fontSize: 13)),
-                    Text(user?.name ?? 'Admin', style: const TextStyle(fontFamily: 'Poppins', fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
+                    const Text('Selamat datang,', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text(user?.name ?? 'Admin', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
                     const SizedBox(height: 4),
-                    const Text('BINUS Marketplace Admin Panel', style: TextStyle(fontFamily: 'Poppins', color: Colors.white60, fontSize: 12)),
+                    const Text('BINUS Marketplace Admin Panel', style: TextStyle(color: Colors.white60, fontSize: 12)),
                   ],
                 ),
               ),
@@ -125,6 +126,39 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ],
                 ),
 
+              const SizedBox(height: 12),
+
+              // Revenue card
+              if (_stats != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: AppDecorations.card,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: AppColors.successLight, borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.account_balance_wallet_rounded, color: AppColors.success, size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Total Pendapatan Komisi', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                            Text(
+                              FormatUtils.currency((_stats!['totalRevenue'] as num).toDouble()),
+                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.success),
+                            ),
+                            Text('Komisi aktif: ${_stats!['currentCommissionRate']}%', style: Theme.of(context).textTheme.bodySmall),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               const SizedBox(height: 20),
               if ((_stats?['pendingListings'] ?? 0) > 0)
                 Container(
@@ -138,7 +172,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       Expanded(
                         child: Text(
                           'Ada ${_stats!['pendingListings']} listing yang menunggu moderasi.',
-                          style: const TextStyle(fontFamily: 'Poppins', color: AppColors.warning, fontWeight: FontWeight.w500),
+                          style: const TextStyle(color: AppColors.warning, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ],
@@ -172,7 +206,7 @@ class _StatCard extends StatelessWidget {
             child: Icon(icon, color: color, size: 20),
           ),
           const Spacer(),
-          Text(value, style: TextStyle(fontFamily: 'Poppins', fontSize: 24, fontWeight: FontWeight.w700, color: color)),
+          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: color)),
           Text(label, style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),

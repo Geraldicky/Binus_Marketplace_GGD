@@ -107,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+<<<<<<< HEAD
                           Text(
                             'Hei, ${user?.name.split(' ').first ?? ''}! 👋',
                             style: const TextStyle(
@@ -114,6 +115,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
+=======
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Hei, ${user?.name.split(' ').first ?? ''}! 👋',
+                                  style: const TextStyle(
+                                    
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const Text(
+                                  'Cari apa hari ini?',
+                                  style: TextStyle(
+                                    
+                                    fontSize: 13,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -141,6 +166,37 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
+<<<<<<< HEAD
+=======
+                      const SizedBox(height: 14),
+                      // Search Bar
+                      TextField(
+                        controller: _searchCtrl,
+                        onSubmitted: _onSearch,
+                        onChanged: (v) { if (v.isEmpty) _onSearch(''); },
+                        style: const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'Cari produk atau jasa...',
+                          hintStyle: const TextStyle(fontSize: 14, color: AppColors.grey500),
+                          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.grey500),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.close_rounded, color: AppColors.grey500),
+                                  onPressed: () {
+                                    _searchCtrl.clear();
+                                    _onSearch('');
+                                  },
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      ),
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                     ],
                   ),
                 ),
@@ -353,7 +409,7 @@ class _Tab extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontFamily: 'Poppins',
+            
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: isSelected ? AppColors.primary : Colors.white,

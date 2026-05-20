@@ -85,7 +85,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     ? ClipOval(child: Image.network(other!.avatarUrl!))
                                     : Text(
                                         other?.name[0].toUpperCase() ?? '?',
-                                        style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 18),
+                                        style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 18),
                                       ),
                               ),
                               if (room.unreadCount > 0)
@@ -97,7 +97,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
                                     child: Text(
                                       room.unreadCount > 9 ? '9+' : room.unreadCount.toString(),
-                                      style: const TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
                                     ),
                                   ),
                                 ),
@@ -115,13 +115,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontFamily: 'Poppins',
+                                    
                                     fontSize: 13,
                                     color: room.unreadCount > 0 ? AppColors.textPrimary : AppColors.textSecondary,
                                     fontWeight: room.unreadCount > 0 ? FontWeight.w600 : FontWeight.normal,
                                   ),
                                 )
-                              : const Text('Mulai percakapan', style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.textSecondary)),
+                              : const Text('Mulai percakapan', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                           trailing: lastMsg != null
                               ? Text(FormatUtils.chatTime(lastMsg.createdAt), style: Theme.of(context).textTheme.bodySmall)
                               : null,

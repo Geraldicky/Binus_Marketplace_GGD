@@ -161,11 +161,37 @@ class ApiService {
     return _parseResponse(res);
   }
 
-  static Future<Map<String, dynamic>> createTransaction(String listingId, {String? note}) async {
+  static Future<Map<String, dynamic>> getBalance() async {
+    final res = await http.get(Uri.parse('$baseUrl/transactions/balance'), headers: await _headers());
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> topupBalance(double amount) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/transactions/topup'),
+      headers: await _headers(),
+      body: jsonEncode({'amount': amount}),
+    );
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> payTransaction(String transactionId) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/transactions/$transactionId/pay'),
+      headers: await _headers(),
+    );
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> createTransaction(
+    String listingId, {
+    String? note,
+    int quantity = 1,
+  }) async {
     final res = await http.post(
       Uri.parse('$baseUrl/transactions'),
       headers: await _headers(),
-      body: jsonEncode({'listingId': listingId, 'note': note}),
+      body: jsonEncode({'listingId': listingId, 'note': note, 'quantity': quantity}),
     );
     return _parseResponse(res);
   }
@@ -296,9 +322,38 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getComplaints({String? status}) async {
+    // Admin endpoint — bukan /complaints biasa (itu hanya untuk POST)
     final params = status != null ? {'status': status} : <String, String>{};
-    final uri = Uri.parse('$baseUrl/complaints').replace(queryParameters: params);
+    final uri = Uri.parse('$baseUrl/admin/complaints').replace(queryParameters: params);
     final res = await http.get(uri, headers: await _headers());
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> updateComplaintStatusAdmin(String id, String status, {String? adminNote}) async {
+    final res = await http.patch(
+      Uri.parse('$baseUrl/admin/complaints/$id'),
+      headers: await _headers(),
+      body: jsonEncode({'status': status, if (adminNote != null) 'adminNote': adminNote}),
+    );
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> getAdminCommission() async {
+    final res = await http.get(Uri.parse('$baseUrl/admin/commission'), headers: await _headers());
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> setAdminCommission(double rate) async {
+    final res = await http.patch(
+      Uri.parse('$baseUrl/admin/commission'),
+      headers: await _headers(),
+      body: jsonEncode({'rate': rate}),
+    );
+    return _parseResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> getAdminCommissionHistory() async {
+    final res = await http.get(Uri.parse('$baseUrl/admin/commission/history'), headers: await _headers());
     return _parseResponse(res);
   }
 

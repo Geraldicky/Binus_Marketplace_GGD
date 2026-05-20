@@ -44,8 +44,8 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Hapus Listing?', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-        content: Text('Listing "${listing.title}" akan dihapus.', style: const TextStyle(fontFamily: 'Poppins')),
+        title: const Text('Hapus Listing?', style: TextStyle(fontWeight: FontWeight.w600)),
+        content: Text('Listing "${listing.title}" akan dihapus.', style: const TextStyle()),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
           ElevatedButton(
@@ -143,7 +143,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                                   Text(
                                     FormatUtils.currency(listing.price),
                                     style: const TextStyle(
-                                      fontFamily: 'Poppins',
+                                      
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.primary,
                                       fontSize: 14,
@@ -159,7 +159,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                                     child: Text(
                                       listing.statusLabel,
                                       style: TextStyle(
-                                        fontFamily: 'Poppins',
+                                        
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
                                         color: _statusColor(listing.status),
@@ -242,7 +242,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text('Tambah Listing', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white)),
+        label: const Text('Tambah Listing', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
       ),
     );
   }

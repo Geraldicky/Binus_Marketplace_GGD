@@ -22,7 +22,11 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
+<<<<<<< HEAD
   final _imagePicker = ImagePicker();
+=======
+  final _stockCtrl = TextEditingController();
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
 
   String _selectedCategory = 'OTHER';
   String _selectedType = 'PRODUCT';
@@ -59,6 +63,9 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
       _selectedCategory = widget.listing!.category;
       _selectedType = widget.listing!.type;
       _selectedCondition = widget.listing!.condition;
+      if (widget.listing!.stock != null) {
+        _stockCtrl.text = widget.listing!.stock.toString();
+      }
     }
   }
 
@@ -67,6 +74,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
     _titleCtrl.dispose();
     _descCtrl.dispose();
     _priceCtrl.dispose();
+    _stockCtrl.dispose();
     super.dispose();
   }
 
@@ -102,7 +110,13 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
         'type': _selectedType,
         if (_selectedType == 'PRODUCT' && _selectedCondition != null)
           'condition': _selectedCondition,
+<<<<<<< HEAD
         'images': imageBase64,
+=======
+        if (_selectedType == 'PRODUCT' && _stockCtrl.text.isNotEmpty)
+          'stock': int.parse(_stockCtrl.text),
+        'images': <String>[],
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
       };
 
       if (_isEditing) {
@@ -198,7 +212,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: const InputDecoration(labelText: 'Kategori', prefixIcon: Icon(Icons.category_outlined)),
-                items: _categories.map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!, style: const TextStyle(fontFamily: 'Poppins')))).toList(),
+                items: _categories.map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!, style: const TextStyle()))).toList(),
                 onChanged: (v) => setState(() => _selectedCategory = v!),
               ),
               const SizedBox(height: 16),
@@ -208,9 +222,29 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
                 DropdownButtonFormField<String>(
                   value: _selectedCondition,
                   decoration: const InputDecoration(labelText: 'Kondisi Barang', prefixIcon: Icon(Icons.star_outline_rounded)),
-                  hint: const Text('Pilih kondisi', style: TextStyle(fontFamily: 'Poppins')),
-                  items: _conditions.map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!, style: const TextStyle(fontFamily: 'Poppins')))).toList(),
+                  hint: const Text('Pilih kondisi', style: TextStyle()),
+                  items: _conditions.map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!, style: const TextStyle()))).toList(),
                   onChanged: (v) => setState(() => _selectedCondition = v),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Jumlah Stok ────────────────────
+                TextFormField(
+                  controller: _stockCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Jumlah Stok',
+                    hintText: 'Contoh: 20',
+                    prefixIcon: Icon(Icons.inventory_2_outlined),
+                    helperText: 'Kosongkan jika stok tidak terbatas',
+                  ),
+                  validator: (v) {
+                    if (v != null && v.isNotEmpty) {
+                      final parsed = int.tryParse(v);
+                      if (parsed == null || parsed < 1) return 'Stok harus angka minimal 1';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
               ],
@@ -334,7 +368,7 @@ class _TypeButton extends StatelessWidget {
           children: [
             Icon(icon, color: isSelected ? Colors.white : AppColors.grey600, size: 24),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.grey700)),
+            Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.grey700)),
           ],
         ),
       ),

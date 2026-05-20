@@ -39,7 +39,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> with Sing
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
-      final res = await ApiService.getComplaints();
+      final res = await ApiService.getComplaints(); // sekarang panggil /admin/complaints
       final data = List<Map<String, dynamic>>.from(res['data']);
 
       final grouped = <String, List<Map<String, dynamic>>>{
@@ -50,7 +50,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> with Sing
       };
 
       for (final c in data) {
-        final status = c['status'] as String;
+        final status = c['status'] as String? ?? 'OPEN';
         grouped[status]?.add(c);
       }
 
@@ -58,14 +58,22 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> with Sing
         _complaints = grouped;
         _isLoading = false;
       });
-    } catch (_) {
+    } on ApiException catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.message}'), backgroundColor: AppColors.error),
+      );
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat: ${e.toString()}'), backgroundColor: AppColors.error),
+      );
     }
   }
 
   Future<void> _updateStatus(String id, String status) async {
     try {
-      await ApiService.updateComplaintStatus(id, status);
+      await ApiService.updateComplaintStatusAdmin(id, status); // gunakan admin endpoint
       _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +81,9 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> with Sing
         );
       }
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message), backgroundColor: AppColors.error),
+      );
     }
   }
 
@@ -104,7 +114,7 @@ class _AdminComplaintsScreenState extends State<AdminComplaintsScreen> with Sing
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
           indicatorWeight: 3,
-          labelStyle: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 13),
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           tabs: [
             Tab(text: 'Baru (${_complaints['OPEN']?.length ?? 0})'),
             Tab(text: 'Proses (${_complaints['IN_REVIEW']?.length ?? 0})'),
@@ -194,7 +204,7 @@ class _ComplaintList extends StatelessWidget {
                         color: statusColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(statusLabel, style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
+                      child: Text(statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
                     ),
                     const SizedBox(width: 8),
                     Container(
@@ -202,7 +212,7 @@ class _ComplaintList extends StatelessWidget {
                       decoration: BoxDecoration(color: AppColors.grey100, borderRadius: BorderRadius.circular(20)),
                       child: Text(
                         c['targetType'] == 'USER' ? 'User' : 'Listing',
-                        style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: AppColors.grey600),
+                        style: const TextStyle(fontSize: 11, color: AppColors.grey600),
                       ),
                     ),
                     const Spacer(),

@@ -1,12 +1,11 @@
 // lib/screens/admin/admin_main_screen.dart
-// Admin: Bottom Nav dengan 3 tab
-
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_moderate_screen.dart';
 import 'admin_users_screen.dart';
 import 'admin_complaints_screen.dart';
+import 'admin_commission_screen.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -23,6 +22,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     AdminModerateScreen(),
     AdminUsersScreen(),
     AdminComplaintsScreen(),
+    AdminCommissionScreen(),
   ];
 
   @override
@@ -37,6 +37,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.rule_outlined), activeIcon: Icon(Icons.rule_rounded), label: 'Moderasi'),
           BottomNavigationBarItem(icon: Icon(Icons.people_outline_rounded), activeIcon: Icon(Icons.people_rounded), label: 'Users'),
           BottomNavigationBarItem(icon: Icon(Icons.report_outlined), activeIcon: Icon(Icons.report_rounded), label: 'Pengaduan'),
+          BottomNavigationBarItem(icon: Icon(Icons.percent_outlined), activeIcon: Icon(Icons.percent_rounded), label: 'Komisi'),
         ],
       ),
     );

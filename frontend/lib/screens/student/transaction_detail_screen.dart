@@ -34,8 +34,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('${labels[status]} Transaksi?', style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-        content: Text(_confirmMessage(status), style: const TextStyle(fontFamily: 'Poppins')),
+        title: Text('${labels[status]} Transaksi?', style: const TextStyle(fontWeight: FontWeight.w600)),
+        content: Text(_confirmMessage(status), style: const TextStyle()),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
           ElevatedButton(
@@ -71,10 +71,181 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   String _confirmMessage(String status) {
     switch (status) {
-      case 'CONFIRMED': return 'Kamu mengkonfirmasi bahwa kamu bersedia menyelesaikan transaksi ini.';
-      case 'COMPLETED': return 'Tandai transaksi ini sebagai selesai. Buyer dapat memberikan review.';
-      case 'CANCELLED': return 'Transaksi akan dibatalkan dan tidak dapat diubah kembali.';
-      default: return '';
+      case 'CONFIRMED':
+        return 'Kamu mengkonfirmasi bahwa kamu siap memproses pesanan ini. Dana buyer sudah tersimpan aman di escrow.';
+      case 'COMPLETED':
+        return 'Tandai transaksi selesai. Dana (${FormatUtils.currency(_transaction.sellerReceives ?? _transaction.price)}) akan langsung ditransfer ke saldo kamu.';
+      case 'CANCELLED':
+        return _transaction.isEscrowHeld
+            ? 'Transaksi dibatalkan. Dana buyer akan dikembalikan (refund) secara otomatis.'
+            : 'Transaksi akan dibatalkan dan tidak dapat diubah kembali.';
+      default:
+        return '';
+    }
+  }
+
+  Future<void> _payTransaction() async {
+    Map<String, dynamic>? balanceData;
+    try {
+      final res = await ApiService.getBalance();
+      balanceData = res['data'];
+    } catch (_) {}
+
+    final balance = (balanceData?['balance'] as num?)?.toDouble() ?? 0;
+    final totalPrice = _transaction.totalPrice; // gunakan totalPrice bukan price
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Konfirmasi Pembayaran',
+            style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_transaction.quantity > 1)
+              _DialogRow(label: 'Jumlah', value: '${_transaction.quantity} unit'),
+            _DialogRow(label: 'Total bayar', value: FormatUtils.currency(totalPrice)),
+            _DialogRow(label: 'Saldo kamu', value: FormatUtils.currency(balance)),
+            _DialogRow(
+              label: 'Sisa saldo',
+              value: FormatUtils.currency(balance - totalPrice),
+              isRed: balance < totalPrice,
+            ),
+            if (balance < totalPrice) ...[
+              const SizedBox(height: 8),
+              const Text('⚠️ Saldo tidak cukup. Topup terlebih dahulu.',
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: AppColors.error)),
+            ],
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                  color: AppColors.primaryLighter, borderRadius: BorderRadius.circular(8)),
+              child: const Text(
+                '🔒 Dana akan disimpan di escrow dan hanya diteruskan ke seller setelah transaksi selesai.',
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: AppColors.primary),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
+          if (balance >= totalPrice)
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Bayar Sekarang'),
+            )
+          else
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+                _showTopup();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.warning),
+              child: const Text('Topup Saldo'),
+            ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isUpdating = true);
+    try {
+      await ApiService.payTransaction(_transaction.id);
+      final detailRes = await ApiService.getTransactionById(_transaction.id);
+      setState(() {
+        _transaction = TransactionModel.fromJson(detailRes['data']);
+        _isUpdating = false;
+      });
+      widget.onUpdate();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pembayaran berhasil! Dana masuk escrow.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      setState(() => _isUpdating = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _showTopup() async {
+    final amountCtrl = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Topup Saldo', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Masukkan nominal topup (simulasi):', style: TextStyle(fontFamily: 'Poppins', fontSize: 13)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: amountCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Nominal (Rp)', prefixText: 'Rp '),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [50000, 100000, 500000, 1000000].map((amt) =>
+                ActionChip(
+                  label: Text(FormatUtils.currency(amt.toDouble()), style: const TextStyle(fontFamily: 'Poppins', fontSize: 11)),
+                  onPressed: () => amountCtrl.text = amt.toString(),
+                ),
+              ).toList(),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = double.tryParse(amountCtrl.text);
+              if (amount == null || amount <= 0) return;
+              try {
+                await ApiService.topupBalance(amount);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Topup ${FormatUtils.currency(amount)} berhasil!'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                }
+              } on ApiException catch (e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.message), backgroundColor: AppColors.error),
+                );
+              }
+            },
+            child: const Text('Topup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Color> _statusGradient(String status) {
+    switch (status) {
+      case 'PAID': return [AppColors.info, const Color(0xFF29B6F6)];
+      case 'CONFIRMED': return [AppColors.primary, AppColors.primaryLight];
+      case 'COMPLETED': return [AppColors.success, const Color(0xFF66BB6A)];
+      case 'CANCELLED': return [AppColors.grey600, AppColors.grey500];
+      default: return [AppColors.warning, const Color(0xFFFFCA28)]; // PENDING
     }
   }
 
@@ -114,7 +285,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary.withOpacity(0.8), AppColors.primaryLight],
+                  colors: _statusGradient(t.status),
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -123,14 +294,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                   const SizedBox(height: 4),
-                  Text(FormatUtils.currency(t.price), style: const TextStyle(fontFamily: 'Poppins', fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(FormatUtils.currency(t.price), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(color: Colors.white.withOpacity(0.25), borderRadius: BorderRadius.circular(20)),
-                    child: Text(t.statusLabel, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: Colors.white, fontSize: 13)),
+                    child: Text(t.statusLabel, style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white, fontSize: 13)),
                   ),
                 ],
               ),
@@ -148,7 +319,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     backgroundColor: AppColors.primaryLighter,
                     child: Text(
                       otherUser?.name[0].toUpperCase() ?? '?',
-                      style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: AppColors.primary),
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -160,7 +331,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                         const Row(children: [
                           Icon(Icons.verified_rounded, size: 12, color: AppColors.primary),
                           SizedBox(width: 4),
-                          Text('Terverifikasi BINUS', style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: AppColors.primary)),
+                          Text('Terverifikasi BINUS', style: TextStyle(fontSize: 11, color: AppColors.primary)),
                         ]),
                     ],
                   ),
@@ -178,6 +349,32 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               ),
 
             if (t.note != null && t.note!.isNotEmpty) const SizedBox(height: 12),
+
+            // Info komisi & rincian harga
+            _InfoCard(
+              title: 'Rincian Harga',
+              child: Column(
+                children: [
+                  if (t.quantity > 1) ...[
+                    _PriceRow(label: 'Harga satuan', value: FormatUtils.currency(t.price)),
+                    _PriceRow(label: 'Jumlah', value: '${t.quantity} unit'),
+                    const Divider(height: 12),
+                  ],
+                  _PriceRow(label: t.quantity > 1 ? 'Subtotal' : 'Harga', value: FormatUtils.currency(t.totalPrice)),
+                  _PriceRow(
+                    label: 'Komisi (${t.commissionRate?.toStringAsFixed(1) ?? '5.0'}%)',
+                    value: '- ${FormatUtils.currency(t.commissionAmt ?? 0)}',
+                    color: AppColors.error,
+                  ),
+                  const Divider(height: 16),
+                  _PriceRow(
+                    label: widget.isBuyer ? 'Total Bayar' : 'Kamu Terima',
+                    value: FormatUtils.currency(widget.isBuyer ? t.totalPrice : (t.sellerReceives ?? t.totalPrice)),
+                    bold: true,
+                  ),
+                ],
+              ),
+            ),
 
             // Tanggal
             _InfoCard(
@@ -215,26 +412,148 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             if (_isUpdating)
               const Center(child: CircularProgressIndicator(color: AppColors.primary))
             else ...[
-              // Seller actions
+              // ── Seller actions ──────────────────
               if (!widget.isBuyer) ...[
+                // Seller konfirmasi hanya setelah buyer bayar (PAID)
+                if (t.sellerCanConfirm)
+                  _ActionButton(
+                    label: 'Konfirmasi Pesanan',
+                    icon: Icons.check_circle_outline_rounded,
+                    color: AppColors.success,
+                    onTap: () => _updateStatus('CONFIRMED'),
+                  ),
+                // Seller selesaikan setelah dikonfirmasi
+                if (t.sellerCanComplete)
+                  _ActionButton(
+                    label: 'Tandai Selesai & Terima Dana',
+                    icon: Icons.done_all_rounded,
+                    color: AppColors.primary,
+                    onTap: () => _updateStatus('COMPLETED'),
+                  ),
+                // Seller batalkan
+                if (t.sellerCanCancel)
+                  _ActionButton(
+                    label: 'Batalkan Transaksi',
+                    icon: Icons.cancel_outlined,
+                    color: AppColors.error,
+                    onTap: () => _updateStatus('CANCELLED'),
+                    isOutline: true,
+                  ),
+                // Jika masih PENDING (buyer belum bayar), beri tahu seller
                 if (t.status == 'PENDING')
-                  _ActionButton(label: 'Konfirmasi Transaksi', icon: Icons.check_circle_outline_rounded, color: AppColors.success, onTap: () => _updateStatus('CONFIRMED')),
-                if (t.status == 'CONFIRMED')
-                  _ActionButton(label: 'Tandai Selesai', icon: Icons.done_all_rounded, color: AppColors.primary, onTap: () => _updateStatus('COMPLETED')),
-                if (['PENDING', 'CONFIRMED'].contains(t.status))
-                  _ActionButton(label: 'Batalkan Transaksi', icon: Icons.cancel_outlined, color: AppColors.error, onTap: () => _updateStatus('CANCELLED'), isOutline: true),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.warningLight,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.hourglass_empty_rounded, color: AppColors.warning, size: 18),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            'Menunggu pembayaran dari buyer. Kamu bisa konfirmasi setelah buyer membayar.',
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.warning),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
 
-              // Buyer actions
+              // ── Buyer actions ───────────────────
               if (widget.isBuyer) ...[
-                if (t.status == 'PENDING')
-                  _ActionButton(label: 'Batalkan Permintaan', icon: Icons.cancel_outlined, color: AppColors.error, onTap: () => _updateStatus('CANCELLED'), isOutline: true),
+                // TOMBOL BAYAR — muncul saat PENDING
+                if (t.canPay)
+                  _ActionButton(
+                    label: 'Bayar Sekarang (Rp ${FormatUtils.currency(t.price)})',
+                    icon: Icons.payment_rounded,
+                    color: AppColors.primary,
+                    onTap: _payTransaction,
+                  ),
+                // Status sudah bayar, menunggu seller
+                if (t.status == 'PAID')
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(color: AppColors.infoLight, borderRadius: BorderRadius.circular(12)),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lock_outline_rounded, color: AppColors.info, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Dana ${FormatUtils.currency(t.price)} tersimpan di escrow. Menunggu konfirmasi seller.',
+                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.info),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Buyer bisa batalkan jika belum dikonfirmasi seller
+                if (t.buyerCanCancel)
+                  _ActionButton(
+                    label: t.isEscrowHeld ? 'Batalkan & Refund Dana' : 'Batalkan Permintaan',
+                    icon: Icons.cancel_outlined,
+                    color: AppColors.error,
+                    onTap: () => _updateStatus('CANCELLED'),
+                    isOutline: true,
+                  ),
+                // Review setelah selesai
                 if (t.canReview)
-                  _ActionButton(label: 'Beri Review', icon: Icons.star_outline_rounded, color: AppColors.warning, onTap: _openReview),
+                  _ActionButton(
+                    label: 'Beri Review',
+                    icon: Icons.star_outline_rounded,
+                    color: AppColors.warning,
+                    onTap: _openReview,
+                  ),
               ],
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DialogRow extends StatelessWidget {
+  final String label, value;
+  final bool isRed;
+  const _DialogRow({required this.label, required this.value, this.isRed = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.textSecondary)),
+          Text(value, style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: isRed ? AppColors.error : AppColors.textPrimary)),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceRow extends StatelessWidget {
+  final String label, value;
+  final bool bold;
+  final Color? color;
+  const _PriceRow({required this.label, required this.value, this.bold = false, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.textSecondary, fontWeight: bold ? FontWeight.w600 : FontWeight.normal)),
+          Text(value, style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: color ?? (bold ? AppColors.primary : AppColors.textPrimary), fontWeight: bold ? FontWeight.w700 : FontWeight.w500)),
+        ],
       ),
     );
   }

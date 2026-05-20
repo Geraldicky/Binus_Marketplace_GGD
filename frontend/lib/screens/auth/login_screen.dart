@@ -20,6 +20,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Clear error saat halaman login dibuka
+    // supaya error dari halaman register tidak muncul di sini
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().clearError();
+    });
+  }
+
+  @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
@@ -72,9 +82,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text(
                       'Selamat Datang! 👋',
                       style: TextStyle(
+<<<<<<< HEAD
                         fontFamily: 'Poppins',
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
+=======
+                        
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+>>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                         color: Colors.white,
                       ),
                     ),
@@ -82,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Login dengan akun BINUS kamu untuk mulai berjualan dan berbelanja',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
                         color: Colors.white.withOpacity(0.9),

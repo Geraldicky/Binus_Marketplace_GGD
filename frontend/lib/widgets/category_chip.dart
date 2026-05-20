@@ -43,7 +43,7 @@ class CategoryChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? Colors.white : AppColors.grey700,
