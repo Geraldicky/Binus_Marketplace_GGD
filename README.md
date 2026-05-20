@@ -8,7 +8,7 @@ Aplikasi marketplace khusus mahasiswa BINUS untuk jual beli barang & jasa.
 
 ```
 binus-marketplace/
-├── backend-ts/     → Express.js + TypeScript + Prisma + Socket.io
+├── backend-ts/     → Nest.js + TypeScript + Prisma + Socket.io
 └── frontend/       → Flutter (Dart)
 ```
 
