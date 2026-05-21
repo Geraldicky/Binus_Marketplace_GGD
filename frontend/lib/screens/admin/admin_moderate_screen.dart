@@ -17,11 +17,7 @@ class AdminModerateScreen extends StatefulWidget {
 class _AdminModerateScreenState extends State<AdminModerateScreen> {
   List<ListingModel> _listings = [];
   bool _isLoading = true;
-<<<<<<< HEAD
-  String? _error;
-=======
   String? _errorMessage;
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
 
   @override
   void initState() {
@@ -30,19 +26,12 @@ class _AdminModerateScreenState extends State<AdminModerateScreen> {
   }
 
   Future<void> _load() async {
-<<<<<<< HEAD
-    setState(() { _isLoading = true; _error = null; });
-=======
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     try {
-      final res = await ApiService.getPendingListings().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw Exception('Koneksi timeout. Coba refresh.'),
-      );
+      final res = await ApiService.getPendingListings();
       final data = res['data'] as List;
       setState(() {
         _listings = data.map((e) => ListingModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -58,14 +47,6 @@ class _AdminModerateScreenState extends State<AdminModerateScreen> {
         _errorMessage = 'Gagal memuat data: ${e.toString()}';
         _isLoading = false;
       });
-<<<<<<< HEAD
-    } catch (e) {
-      setState(() {
-        _error = e.toString().replaceAll('Exception: ', '');
-        _isLoading = false;
-      });
-=======
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     }
   }
 
@@ -133,37 +114,6 @@ class _AdminModerateScreenState extends State<AdminModerateScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-<<<<<<< HEAD
-          : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(color: AppColors.errorLight, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.error.withOpacity(0.3))),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Error Memuat Data', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.error)),
-                              const SizedBox(height: 8),
-                              Text(_error!, style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: AppColors.error)),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _load,
-                                  icon: const Icon(Icons.refresh_rounded),
-                                  label: const Text('Coba Lagi'),
-                                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-                                ),
-                              ),
-                            ],
-                          ),
-=======
           : _errorMessage != null
               // Tampilkan error dengan tombol retry
               ? Center(
@@ -184,7 +134,6 @@ class _AdminModerateScreenState extends State<AdminModerateScreen> {
                           onPressed: _load,
                           icon: const Icon(Icons.refresh_rounded),
                           label: const Text('Coba Lagi'),
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                         ),
                       ],
                     ),
@@ -200,14 +149,10 @@ class _AdminModerateScreenState extends State<AdminModerateScreen> {
                             children: [
                               Icon(Icons.check_circle_outline_rounded, size: 72, color: AppColors.success),
                               SizedBox(height: 12),
-<<<<<<< HEAD
-                              Text('Semua listing sudah direview!', style: TextStyle(fontFamily: 'Poppins', fontSize: 16, color: AppColors.grey500)),
-=======
                               Text(
                                 'Semua listing sudah direview!',
                                 style: TextStyle(fontFamily: 'Poppins', fontSize: 16, color: AppColors.grey500),
                               ),
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                             ],
                           ),
                         )

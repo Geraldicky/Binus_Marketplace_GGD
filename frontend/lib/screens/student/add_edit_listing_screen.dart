@@ -2,9 +2,6 @@
 // UC-003: Tambah / Edit Listing
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'dart:convert';
 import '../../models/models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -22,17 +19,12 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
-<<<<<<< HEAD
-  final _imagePicker = ImagePicker();
-=======
   final _stockCtrl = TextEditingController();
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
 
   String _selectedCategory = 'OTHER';
   String _selectedType = 'PRODUCT';
   String? _selectedCondition;
   bool _isSaving = false;
-  List<File> _pickedImages = [];
 
   bool get _isEditing => widget.listing != null;
 
@@ -78,30 +70,11 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final image = await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (image != null && mounted) {
-      setState(() => _pickedImages.add(File(image.path)));
-    }
-  }
-
-  void _removeImage(int index) {
-    setState(() => _pickedImages.removeAt(index));
-  }
-
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
     try {
-      // Convert images to base64
-      List<String> imageBase64 = [];
-      for (final file in _pickedImages) {
-        final bytes = await file.readAsBytes();
-        // Create data URL untuk store file type info
-        imageBase64.add('data:image/jpeg;base64,${base64Encode(bytes)}');
-      }
-
       final data = {
         'title': _titleCtrl.text.trim(),
         'description': _descCtrl.text.trim(),
@@ -110,13 +83,9 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
         'type': _selectedType,
         if (_selectedType == 'PRODUCT' && _selectedCondition != null)
           'condition': _selectedCondition,
-<<<<<<< HEAD
-        'images': imageBase64,
-=======
         if (_selectedType == 'PRODUCT' && _stockCtrl.text.isNotEmpty)
           'stock': int.parse(_stockCtrl.text),
         'images': <String>[],
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
       };
 
       if (_isEditing) {
@@ -248,70 +217,6 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
                 ),
                 const SizedBox(height: 16),
               ],
-
-              // ── Upload Foto ───────────────────
-              Text('Foto Produk/Jasa', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 10),
-              if (_pickedImages.isNotEmpty)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(_pickedImages.length, (i) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(_pickedImages[i], fit: BoxFit.cover),
-                              ),
-                            ),
-                            Positioned(
-                              top: -8,
-                              right: -8,
-                              child: GestureDetector(
-                                onTap: () => _removeImage(i),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-                                  child: const Icon(Icons.close_rounded, color: Colors.white, size: 16),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: _pickedImages.length < 5 ? _pickImage : null,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.primary, width: 1.5, style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(12),
-                    color: _pickedImages.length >= 5 ? AppColors.grey100 : Colors.transparent,
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.add_photo_alternate_outlined, color: _pickedImages.length >= 5 ? AppColors.grey400 : AppColors.primary, size: 32),
-                      const SizedBox(height: 6),
-                      Text(
-                        _pickedImages.length >= 5 ? 'Maksimal 5 foto' : 'Tambah Foto (${_pickedImages.length}/5)',
-                        style: TextStyle(fontFamily: 'Poppins', color: _pickedImages.length >= 5 ? AppColors.grey400 : AppColors.primary, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
 
               // ── Deskripsi ─────────────────────
               TextFormField(

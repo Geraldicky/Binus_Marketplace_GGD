@@ -219,127 +219,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
         ],
       ),
-<<<<<<< HEAD
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // ── Header Profile dengan Gradient ────────
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      child: user.avatarUrl != null
-                          ? ClipOval(child: Image.network(user.avatarUrl!, width: 96, height: 96, fit: BoxFit.cover))
-                          : Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.primaryLight,
-                                    AppColors.primary,
-                                  ],
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  user.name[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 42,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          user.name,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      if (user.isVerified) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: AppColors.success,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.check_rounded, color: Colors.white, size: 14),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    user.email,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.85),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (user.studentId != null) ...[
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
-                      ),
-                      child: Text(
-                        'NIM: ${user.studentId}',
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ),
-=======
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: _loadBalance,
@@ -374,63 +253,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(user.email, style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: Colors.white70)),
                     if (user.studentId != null)
                       Text('NIM: ${user.studentId}', style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.white60)),
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                   ],
                 ),
               ),
 
-<<<<<<< HEAD
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-              child: Column(
-                children: [
-                  // ── Edit form atau info ───────────
-                  if (_isEditing)
-                    _EditForm(nameCtrl: _nameCtrl, phoneCtrl: _phoneCtrl, bioCtrl: _bioCtrl, isSaving: _isSaving, onSave: _saveProfile)
-                  else
-                    _ProfileInfo(user: user),
-
-                  const SizedBox(height: 24),
-
-                  // ── Tombol Keluar ─────────────────
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.error, Color(0xFFC2185B)],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.error.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _logout,
-                        borderRadius: BorderRadius.circular(14),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.logout_rounded, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                'Keluar Akun',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-=======
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -471,7 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.error,
                           side: const BorderSide(color: AppColors.error),
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                         ),
                       ),
                     ),
@@ -571,36 +396,6 @@ class _ProfileInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-    return Column(
-      children: [
-        _InfoCard(
-          icon: Icons.phone_rounded,
-          label: 'No. Telepon',
-          value: user.phone ?? '-',
-          iconColor: AppColors.info,
-          gradientColors: [const Color(0xFF039BE5), const Color(0xFF0277BD)],
-        ),
-        const SizedBox(height: 12),
-        _InfoCard(
-          icon: Icons.info_rounded,
-          label: 'Bio',
-          value: user.bio ?? '-',
-          iconColor: const Color(0xFFF59E0B),
-          gradientColors: [const Color(0xFFF59E0B), const Color(0xFDD97706)],
-        ),
-        const SizedBox(height: 12),
-        _InfoCard(
-          icon: Icons.verified_user_rounded,
-          label: 'Status',
-          value: user.isVerified ? 'Terverifikasi BINUS ✓' : 'Belum Terverifikasi',
-          iconColor: user.isVerified ? AppColors.success : AppColors.warning,
-          gradientColors: user.isVerified
-              ? [const Color(0xFF43A047), const Color(0xFF388E3C)]
-              : [const Color(0xFFFB8C00), const Color(0xFFF57C00)],
-        ),
-      ],
-=======
     return Container(
       decoration: AppDecorations.card,
       child: Column(
@@ -616,83 +411,21 @@ class _ProfileInfo extends StatelessWidget {
           ),
         ],
       ),
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     );
   }
 }
 
-class _InfoCard extends StatelessWidget {
+class _InfoTile extends StatelessWidget {
   final IconData icon;
-<<<<<<< HEAD
-  final String label;
-  final String value;
-  final Color iconColor;
-  final List<Color> gradientColors;
-
-  const _InfoCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.iconColor,
-    required this.gradientColors,
-  });
-=======
   final String label, value;
   const _InfoTile({required this.icon, required this.label, required this.value});
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: iconColor.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradientColors),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primary, size: 20),
+      title: Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+      subtitle: Text(value, style: Theme.of(context).textTheme.bodyLarge),
     );
   }
 }
@@ -715,13 +448,6 @@ class _EditForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-<<<<<<< HEAD
-        Text(
-          'Edit Profil',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-=======
         TextFormField(
           controller: nameCtrl,
           decoration: const InputDecoration(
@@ -746,116 +472,16 @@ class _EditForm extends StatelessWidget {
             labelText: 'Bio (opsional)',
             hintText: 'Ceritakan sedikit tentang dirimu...',
             alignLabelWithHint: true,
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
           ),
         ),
         const SizedBox(height: 20),
-        TextFormField(
-          controller: nameCtrl,
-          decoration: InputDecoration(
-            labelText: 'Nama Lengkap',
-            prefixIcon: Icon(Icons.person_rounded, color: AppColors.primary.withOpacity(0.6)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: AppColors.grey50,
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: phoneCtrl,
-          keyboardType: TextInputType.phone,
-          decoration: InputDecoration(
-            labelText: 'No. Telepon (opsional)',
-            prefixIcon: Icon(Icons.phone_rounded, color: AppColors.primary.withOpacity(0.6)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: AppColors.grey50,
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: bioCtrl,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: 'Bio (opsional)',
-            hintText: 'Ceritakan sedikit tentang dirimu...',
-            prefixIcon: Icon(Icons.info_rounded, color: AppColors.primary.withOpacity(0.6)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: AppColors.grey50,
-            alignLabelWithHint: true,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryLight],
-            ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: isSaving ? null : onSave,
-              borderRadius: BorderRadius.circular(14),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Center(
-                  child: isSaving
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text(
-                          'Simpan Perubahan',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
-              ),
-            ),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: isSaving ? null : onSave,
+            child: isSaving
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Text('Simpan Profil'),
           ),
         ),
       ],

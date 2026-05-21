@@ -17,7 +17,6 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Map<String, dynamic>? _stats;
   bool _isLoading = true;
-  String? _error;
 
   @override
   void initState() {
@@ -26,18 +25,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Future<void> _load() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() => _isLoading = true);
     try {
-      final res = await ApiService.getAdminDashboard().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw Exception('Koneksi timeout. Coba refresh.'),
-      );
+      final res = await ApiService.getAdminDashboard();
       setState(() { _stats = res['data']; _isLoading = false; });
-    } catch (e) {
-      setState(() {
-        _error = e.toString().replaceAll('Exception: ', '');
-        _isLoading = false;
-      });
+    } catch (_) {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -86,30 +79,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
               if (_isLoading)
                 const Center(child: CircularProgressIndicator(color: AppColors.primary))
-              else if (_error != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: AppColors.errorLight, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.error.withOpacity(0.3))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Error Memuat Data', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.error)),
-                      const SizedBox(height: 8),
-                      Text(_error!, style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: AppColors.error)),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _load,
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Coba Lagi'),
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
               else if (_stats != null)
                 GridView.count(
                   crossAxisCount: 2,

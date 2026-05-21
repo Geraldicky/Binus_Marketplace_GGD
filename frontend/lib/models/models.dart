@@ -30,19 +30,6 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-<<<<<<< HEAD
-      id: json['id'] ?? '',
-      email: json['email'] ?? '',
-      name: json['name'] ?? 'Unknown User',
-      studentId: json['studentId'],
-      phone: json['phone'],
-      bio: json['bio'],
-      avatarUrl: json['avatarUrl'],
-      role: json['role'] ?? 'STUDENT',
-      isVerified: json['isVerified'] ?? false,
-      avgRating: json['avgRating']?.toDouble(),
-      reviewCount: json['reviewCount'],
-=======
       id: json['id'] as String? ?? '',
       // email bisa null kalau data dari seller di listing (partial select)
       email: json['email'] as String? ?? '',
@@ -56,7 +43,6 @@ class UserModel {
       isVerified: json['isVerified'] as bool? ?? false,
       avgRating: (json['avgRating'] as num?)?.toDouble(),
       reviewCount: json['reviewCount'] as int?,
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     );
   }
 
@@ -124,19 +110,6 @@ class ListingModel {
     }
 
     return ListingModel(
-<<<<<<< HEAD
-      id: json['id'] ?? '',
-      title: json['title'] ?? 'Produk Tanpa Judul',
-      description: json['description'] ?? 'Tidak ada deskripsi',
-      price: json['price'] != null ? double.parse(json['price'].toString()) : 0.0,
-      category: json['category'] ?? 'OTHER',
-      type: json['type'] ?? 'PRODUCT',
-      images: parseImages(json['images']),
-      status: json['status'] ?? 'PENDING',
-      condition: json['condition'],
-      sellerId: json['sellerId'] ?? '',
-      seller: json['seller'] != null ? UserModel.fromJson(json['seller']) : null,
-=======
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
@@ -150,7 +123,6 @@ class ListingModel {
       stockLeft: json['stockLeft'] as int?,
       sellerId: json['sellerId'] as String? ?? '',
       seller: json['seller'] != null ? UserModel.fromJson(json['seller'] as Map<String, dynamic>) : null,
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     );
   }
@@ -334,15 +306,6 @@ class MessageModel {
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
-<<<<<<< HEAD
-      id: json['id'] ?? '',
-      chatRoomId: json['chatRoomId'] ?? json['roomId'] ?? '',
-      senderId: json['senderId'] ?? '',
-      sender: json['sender'] != null ? UserModel.fromJson(json['sender']) : null,
-      content: json['content'] ?? '',
-      isRead: json['isRead'] ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-=======
       id: json['id'] as String? ?? '',
       chatRoomId: json['chatRoomId'] as String? ?? '',
       senderId: json['senderId'] as String? ?? '',
@@ -351,7 +314,6 @@ class MessageModel {
       isRead: json['isRead'] as bool? ?? false,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       isPending: false,
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     );
   }
 }

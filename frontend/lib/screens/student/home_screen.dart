@@ -27,14 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
 
   final List<Map<String, dynamic>> _categories = [
-    {'key': null, 'label': 'Semua', 'icon': Icons.apps_rounded, 'colors': [Color(0xFF42A5F5), Color(0xFF1565C0)]},
-    {'key': 'ELECTRONICS', 'label': 'Elektronik', 'icon': Icons.devices_rounded, 'colors': [Color(0xFF7C3AED), Color(0xFF5B21B6)]},
-    {'key': 'BOOKS', 'label': 'Buku', 'icon': Icons.menu_book_rounded, 'colors': [Color(0xFFF97316), Color(0xFDC2D3)]},
-    {'key': 'FASHION', 'label': 'Fashion', 'icon': Icons.checkroom_rounded, 'colors': [Color(0xFFEC4899), Color(0xFF831843)]},
-    {'key': 'FOOD', 'label': 'Makanan', 'icon': Icons.fastfood_rounded, 'colors': [Color(0xFF10B981), Color(0xFF065F46)]},
-    {'key': 'SERVICES', 'label': 'Jasa', 'icon': Icons.handyman_rounded, 'colors': [Color(0xFFF59E0B), Color(0xFD92400E)]},
-    {'key': 'SPORTS', 'label': 'Olahraga', 'icon': Icons.sports_basketball_rounded, 'colors': [Color(0xFFEF4444), Color(0xFF7F1D1D)]},
-    {'key': 'OTHER', 'label': 'Lainnya', 'icon': Icons.category_rounded, 'colors': [Color(0xFF06B6D4), Color(0xFF164E63)]},
+    {'key': null, 'label': 'Semua', 'icon': Icons.apps_rounded},
+    {'key': 'ELECTRONICS', 'label': 'Elektronik', 'icon': Icons.devices_rounded},
+    {'key': 'BOOKS', 'label': 'Buku', 'icon': Icons.menu_book_rounded},
+    {'key': 'FASHION', 'label': 'Fashion', 'icon': Icons.checkroom_rounded},
+    {'key': 'FOOD', 'label': 'Makanan', 'icon': Icons.fastfood_rounded},
+    {'key': 'SERVICES', 'label': 'Jasa', 'icon': Icons.handyman_rounded},
+    {'key': 'SPORTS', 'label': 'Olahraga', 'icon': Icons.sports_basketball_rounded},
+    {'key': 'OTHER', 'label': 'Lainnya', 'icon': Icons.category_rounded},
   ];
 
   @override
@@ -92,30 +92,13 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: AppColors.primary,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
-                    ),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
+                  decoration: AppDecorations.blueGradient,
+                  padding: const EdgeInsets.fromLTRB(20, 48, 20, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-<<<<<<< HEAD
-                          Text(
-                            'Hei, ${user?.name.split(' ').first ?? ''}! 👋',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-=======
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,24 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               ],
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Cari apa hari ini?',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
                           // Filter type toggle
                           _TypeToggle(
                             selectedType: _selectedType,
@@ -166,8 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-<<<<<<< HEAD
-=======
                       const SizedBox(height: 14),
                       // Search Bar
                       TextField(
@@ -196,122 +161,34 @@ class _HomeScreenState extends State<HomeScreen> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                       ),
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
                     ],
                   ),
                 ),
               ),
             ),
 
-            // ── Categories dengan Warna Menarik ───────────────────
+            // ── Categories ────────────────────────
             SliverToBoxAdapter(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: List.generate(
-                      _categories.length,
-                      (i) {
-                        final cat = _categories[i];
-                        final isSelected = _selectedCategory == cat['key'];
-                        final colors = cat['colors'] as List<Color>;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() => _selectedCategory = cat['key']);
-                              _loadListings();
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                gradient: isSelected
-                                    ? LinearGradient(colors: colors)
-                                    : null,
-                                color: isSelected ? null : AppColors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: isSelected
-                                    ? null
-                                    : Border.all(color: AppColors.grey300, width: 1.5),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: colors.first.withOpacity(0.35),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(cat['icon'], 
-                                    size: 16,
-                                    color: isSelected ? Colors.white : AppColors.grey600,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    cat['label'],
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: isSelected ? Colors.white : AppColors.grey700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
+              child: SizedBox(
+                height: 56,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemCount: _categories.length,
+                  itemBuilder: (_, i) {
+                    final cat = _categories[i];
+                    final isSelected = _selectedCategory == cat['key'];
+                    return CategoryChip(
+                      label: cat['label'],
+                      icon: cat['icon'],
+                      isSelected: isSelected,
+                      onTap: () {
+                        setState(() => _selectedCategory = cat['key']);
+                        _loadListings();
                       },
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Search Bar ─────────────────────────
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              sliver: SliverToBoxAdapter(
-                child: TextField(
-                  controller: _searchCtrl,
-                  onSubmitted: _onSearch,
-                  onChanged: (v) { if (v.isEmpty) _onSearch(''); },
-                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: 'Cari produk atau jasa...',
-                    hintStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: AppColors.grey500),
-                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.primary.withOpacity(0.6)),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.close_rounded, color: AppColors.grey500),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              _onSearch('');
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.grey300, width: 1.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),

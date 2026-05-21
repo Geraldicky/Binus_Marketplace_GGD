@@ -3,8 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/models.dart';
-import '../../services/api_service.dart';
 import '../../services/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import 'home_screen.dart';
@@ -22,7 +20,6 @@ class MainNavScreen extends StatefulWidget {
 
 class _MainNavScreenState extends State<MainNavScreen> {
   int _currentIndex = 0;
-  int _totalUnread = 0;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -31,28 +28,6 @@ class _MainNavScreenState extends State<MainNavScreen> {
     ChatListScreen(),
     ProfileScreen(),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUnreadCount();
-    // Refresh unread count setiap 5 detik
-    Future.delayed(const Duration(seconds: 5)).then((_) {
-      if (mounted) {
-        _loadUnreadCount();
-      }
-    });
-  }
-
-  Future<void> _loadUnreadCount() async {
-    try {
-      final res = await ApiService.getChatRooms();
-      final data = res['data'] as List;
-      final rooms = data.map((e) => ChatRoomModel.fromJson(e)).toList();
-      final total = rooms.fold<int>(0, (sum, room) => sum + room.unreadCount);
-      setState(() => _totalUnread = total);
-    } catch (_) {}
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,32 +48,29 @@ class _MainNavScreenState extends State<MainNavScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (i) {
-            setState(() => _currentIndex = i);
-            if (i == 3) _loadUnreadCount(); // Reload saat buka chat
-          },
-          items: [
-            const BottomNavigationBarItem(
+          onTap: (i) => setState(() => _currentIndex = i),
+          items: const [
+            BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_rounded),
               label: 'Beranda',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.storefront_outlined),
               activeIcon: Icon(Icons.storefront_rounded),
               label: 'Jualanku',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long_outlined),
               activeIcon: Icon(Icons.receipt_long_rounded),
               label: 'Transaksi',
             ),
             BottomNavigationBarItem(
-              icon: _buildChatIcon(),
-              activeIcon: _buildChatIcon(active: true),
+              icon: Icon(Icons.chat_bubble_outline_rounded),
+              activeIcon: Icon(Icons.chat_bubble_rounded),
               label: 'Pesan',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
               activeIcon: Icon(Icons.person_rounded),
               label: 'Profil',
@@ -106,27 +78,6 @@ class _MainNavScreenState extends State<MainNavScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildChatIcon({bool active = false}) {
-    return Stack(
-      children: [
-        Icon(active ? Icons.chat_bubble_rounded : Icons.chat_bubble_outline_rounded),
-        if (_totalUnread > 0)
-          Positioned(
-            right: -4,
-            top: -4,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-              child: Text(
-                _totalUnread > 99 ? '99+' : _totalUnread.toString(),
-                style: const TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

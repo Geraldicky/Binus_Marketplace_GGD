@@ -56,6 +56,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           _isLoading = false;
         });
         _scrollToBottom();
+        // Pastikan join room setelah pesan dimuat
+        // (socket mungkin sudah connect lebih dulu dari loadMessages selesai)
+        if (_socket != null && _socket!.connected) {
+          _socket!.emit('join_room', widget.roomId);
+        }
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
@@ -66,51 +71,33 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final token = await ApiService.getToken();
     if (token == null) return;
 
-    // Gunakan IP yang sama dengan baseUrl API
-    // Untuk Android emulator: 10.0.2.2, untuk device fisik: IP komputer
     const socketUrl = 'http://10.0.2.2:3000';
 
     _socket = IO.io(
       socketUrl,
       IO.OptionBuilder()
-          // PENTING: gunakan ['polling', 'websocket'] bukan hanya ['websocket']
-          // Android emulator sering gagal kalau langsung websocket
           .setTransports(['polling', 'websocket'])
           .setAuth({'token': token})
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(5)
-          .setReconnectionDelay(2000)
+          .setReconnectionAttempts(10)
+          .setReconnectionDelay(1000)
           .build(),
     );
 
     _socket!.onConnect((_) {
-      debugPrint('✅ Socket connected');
-      // Join room setelah connect
+      debugPrint('✅ Socket connected: ${_socket!.id}');
+      // Join room setiap kali connect/reconnect
       _socket!.emit('join_room', widget.roomId);
     });
 
-<<<<<<< HEAD
-    _socket!.on('new_message', (data) {
-      final msg = MessageModel.fromJson(Map<String, dynamic>.from(data));
-      setState(() {
-        // Cek apakah message sudah ada (optimistic update)
-        final idx = _messages.indexWhere((m) => m.senderId == msg.senderId && m.content == msg.content && m.id.startsWith('temp_'));
-        if (idx >= 0) {
-          _messages[idx] = msg; // Replace temp message dengan actual
-        } else {
-          _messages.add(msg); // Jika belum ada, add baru
-        }
-      });
-      _scrollToBottom();
-=======
-    _socket!.onConnectError((err) {
-      debugPrint('❌ Socket connect error: $err');
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
+    _socket!.onReconnect((_) {
+      debugPrint('🔄 Socket reconnected, rejoining room...');
+      _socket!.emit('join_room', widget.roomId);
     });
 
-    _socket!.onError((err) {
-      debugPrint('❌ Socket error: $err');
+    _socket!.onConnectError((err) {
+      debugPrint('❌ Socket connect error: $err');
     });
 
     _socket!.onDisconnect((_) {
@@ -120,15 +107,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     _socket!.on('new_message', (data) {
       try {
         final msg = MessageModel.fromJson(Map<String, dynamic>.from(data as Map));
-        if (mounted) {
-          setState(() {
-            // Hindari duplikat pesan
-            if (!_messages.any((m) => m.id == msg.id)) {
-              _messages.add(msg);
-            }
-          });
-          _scrollToBottom();
-        }
+        if (!mounted) return;
+
+        setState(() {
+          // Hapus pesan optimistic sementara (temp_) jika ini adalah konfirmasi dari server
+          // untuk pesan yang kita kirim sendiri
+          if (msg.senderId == _myId) {
+            _messages.removeWhere((m) => m.isPending);
+          }
+          // Tambah pesan dari server jika belum ada
+          if (!_messages.any((m) => m.id == msg.id)) {
+            _messages.add(msg);
+          }
+        });
+        _scrollToBottom();
       } catch (e) {
         debugPrint('❌ Error parsing message: $e');
       }
@@ -144,41 +136,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     });
 
     _socket!.on('error', (data) {
-      debugPrint('❌ Socket server error: $data');
+      debugPrint('❌ Socket error: $data');
     });
 
-    // Connect secara eksplisit
     _socket!.connect();
   }
 
   void _sendMessage() {
     final content = _msgCtrl.text.trim();
-<<<<<<< HEAD
-    if (content.isEmpty || _socket == null || _myId == null) return;
-
-    // Optimistic update - tambah langsung ke list
-    final tempMsg = MessageModel(
-      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-      chatRoomId: widget.roomId,
-      senderId: _myId!,
-      content: content,
-      isRead: false,
-      createdAt: DateTime.now(),
-    );
-    
-    setState(() => _messages.add(tempMsg));
-    _scrollToBottom();
-
-    // Emit ke server
-    _socket!.emit('send_message', {'roomId': widget.roomId, 'content': content});
-=======
     if (content.isEmpty) return;
 
     if (_socket == null || !(_socket!.connected)) {
-      // Jika socket belum connect, coba reconnect dulu
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Menghubungkan ke server... Coba lagi sebentar'),
+          content: Text('Sedang menghubungkan... coba lagi sebentar'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -186,25 +157,27 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       return;
     }
 
-    // Optimistic UI: tampilkan pesan langsung di UI sebelum konfirmasi server
+    // Pastikan sudah join room sebelum kirim
+    _socket!.emit('join_room', widget.roomId);
+
+    // Optimistic UI: tampilkan pesan segera di sisi pengirim
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final optimisticMsg = MessageModel(
-      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+      id: tempId,
       chatRoomId: widget.roomId,
       senderId: _myId ?? '',
-      sender: null,
       content: content,
       isRead: false,
       createdAt: DateTime.now(),
-      isPending: true, // flag sementara
+      isPending: true,
     );
 
     setState(() => _messages.add(optimisticMsg));
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     _msgCtrl.clear();
     _stopTyping();
     _scrollToBottom();
 
-    // Kirim ke server via socket
+    // Kirim ke server
     _socket!.emit('send_message', {'roomId': widget.roomId, 'content': content});
   }
 

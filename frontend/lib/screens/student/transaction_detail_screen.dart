@@ -443,20 +443,29 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 if (t.status == 'PENDING')
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: AppColors.warningLight,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.warning.withOpacity(0.4)),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.hourglass_empty_rounded, color: AppColors.warning, size: 18),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text(
-                            'Menunggu pembayaran dari buyer. Kamu bisa konfirmasi setelah buyer membayar.',
-                            style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: AppColors.warning),
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.hourglass_empty_rounded, color: AppColors.warning, size: 18),
+                            const SizedBox(width: 8),
+                            const Text('Menunggu Pembayaran Buyer',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14,
+                                    fontWeight: FontWeight.w600, color: AppColors.warning)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Buyer belum melakukan pembayaran. Kamu bisa mengkonfirmasi pesanan setelah buyer menyelesaikan pembayaran.\n\n'
+                          'Alur: Buyer Bayar → Kamu Konfirmasi → Kamu Tandai Selesai → Dana cair ke saldo kamu.',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: AppColors.warning),
                         ),
                       ],
                     ),
@@ -468,7 +477,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 // TOMBOL BAYAR — muncul saat PENDING
                 if (t.canPay)
                   _ActionButton(
-                    label: 'Bayar Sekarang (Rp ${FormatUtils.currency(t.price)})',
+                    label: 'Bayar Sekarang (${FormatUtils.currency(t.totalPrice)})',
                     icon: Icons.payment_rounded,
                     color: AppColors.primary,
                     onTap: _payTransaction,

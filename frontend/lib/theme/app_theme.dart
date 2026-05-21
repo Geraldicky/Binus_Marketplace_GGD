@@ -13,20 +13,8 @@ class AppColors {
   static const primaryDark = Color(0xFF0D47A1);
 
   // ── Accent ────────────────────────────────
-<<<<<<< HEAD
-  static const accent = Color(0xFF2196F3);         // Biru accent
-  static const accentLight = Color(0xFFBBDEFB);   // Biru accent light
-  
-  // ── Vibrant Gradient Colors ───────────────
-  static const gradientPurple = Color(0xFF7C3AED);  // Purple vibrant
-  static const gradientPink = Color(0xFFEC4899);    // Pink vibrant
-  static const gradientOrange = Color(0xFFF97316);  // Orange vibrant
-  static const gradientGreen = Color(0xFF10B981);   // Green vibrant
-  static const gradientRed = Color(0xFFEF4444);     // Red vibrant
-=======
   static const accent = Color(0xFF2196F3);
   static const accentLight = Color(0xFFBBDEFB);
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
 
   // ── Status Colors ─────────────────────────
   static const success = Color(0xFF43A047);
@@ -231,35 +219,9 @@ class AppDecorations {
       colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
     ),
   );
-  
-  /// Premium gradient untuk card special
-  static BoxDecoration get premiumGradient => const BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [AppColors.gradientPurple, AppColors.gradientPink],
-    ),
-  );
 
   static BoxDecoration statusBadge(Color color) => BoxDecoration(
     color: color.withOpacity(0.12),
     borderRadius: BorderRadius.circular(20),
-  );
-  
-  /// Kategori card dengan gradient
-  static BoxDecoration categoryGradient(List<Color> colors) => BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: colors,
-    ),
-    borderRadius: BorderRadius.circular(16),
-    boxShadow: [
-      BoxShadow(
-        color: colors.first.withOpacity(0.3),
-        blurRadius: 12,
-        offset: const Offset(0, 4),
-      ),
-    ],
   );
 }
