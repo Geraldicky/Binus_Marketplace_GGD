@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "BINUS Student Marketplace - NestJS Backend",
   "scripts": {
-    "build": "npx prisma generate && nest build",
+    "build": "npx nest build",
     "start": "node dist/main",
     "dev": "nest start --watch",
     "db:generate": "npx prisma generate",
