@@ -55,6 +55,7 @@ dependencies:
   timeago: ^3.6.1
 
   cupertino_icons: ^1.0.6
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:
