@@ -1,0 +1,21 @@
+# railway.toml
+# Taruh file ini di root folder Backend/
+# Railway akan baca file ini untuk tahu cara build & start app
+
+[build]
+builder = "NIXPACKS"
+
+# Perintah build: compile TypeScript → JavaScript di folder dist/
+buildCommand = "npm install && npm run build && npx prisma generate"
+
+[deploy]
+# Perintah start setelah build selesai
+startCommand = "npx prisma migrate deploy && node dist/src/main"
+
+# Health check — Railway akan cek endpoint ini setelah deploy
+healthcheckPath = "/api"
+healthcheckTimeout = 60
+
+# Restart otomatis kalau crash
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
