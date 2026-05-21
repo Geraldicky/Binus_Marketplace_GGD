@@ -1,7 +1,7 @@
 // src/users/users.service.ts
 
 import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/user.dto';
 
