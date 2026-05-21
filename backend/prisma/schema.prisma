@@ -63,7 +63,7 @@ model Listing {
   price       Decimal       @db.Decimal(12, 2)
   category    Category
   type        ListingType   @default(PRODUCT)
-  images      String        @default("[]") @db.Text
+  images      String        @db.Text
   status      ListingStatus @default(PENDING)
   condition   Condition?
   // Stock management — hanya berlaku untuk tipe PRODUCT

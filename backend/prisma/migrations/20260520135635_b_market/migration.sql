@@ -29,7 +29,7 @@ CREATE TABLE `listings` (
     `price` DECIMAL(12, 2) NOT NULL,
     `category` ENUM('ELECTRONICS', 'BOOKS', 'FASHION', 'FOOD', 'SERVICES', 'SPORTS', 'OTHER') NOT NULL,
     `type` ENUM('PRODUCT', 'SERVICE') NOT NULL DEFAULT 'PRODUCT',
-    `images` TEXT NOT NULL DEFAULT '[]',
+    `images` TEXT NOT NULL,
     `status` ENUM('PENDING', 'ACTIVE', 'REJECTED', 'SOLD', 'INACTIVE') NOT NULL DEFAULT 'PENDING',
     `condition` ENUM('NEW', 'LIKE_NEW', 'GOOD', 'FAIR') NULL,
     `stock` INTEGER NULL,
