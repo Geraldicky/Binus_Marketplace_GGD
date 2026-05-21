@@ -43,7 +43,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   const PORT = process.env.PORT ?? 3000;
-  await app.listen(PORT);
+  await app.listen(PORT, '0.0.0.0');
 
   console.log(`🚀 BINUS Marketplace API (NestJS)  →  http://localhost:${PORT}/api`);
   console.log(`📡 Socket.io (WebSocket)           →  port ${PORT}`);
