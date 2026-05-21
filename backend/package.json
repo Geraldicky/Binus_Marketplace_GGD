@@ -12,9 +12,6 @@
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@prisma/client": "^5.22.0",
-=======
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.2.0",
     "@nestjs/core": "^10.3.0",
@@ -24,7 +21,6 @@
     "@nestjs/websockets": "^10.3.0",
     "@nestjs/platform-socket.io": "^10.3.0",
     "@prisma/client": "^5.10.0",
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -40,13 +36,8 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.30",
-<<<<<<< HEAD
-    "@types/uuid": "^9.0.8",
-    "prisma": "^5.22.0",
-=======
     "@types/passport-jwt": "^4.0.1",
     "prisma": "^5.10.0",
->>>>>>> ff96668 (Reconstruct backend architecture from express to Nest)
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3"
   }
