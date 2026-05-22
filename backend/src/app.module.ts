@@ -28,6 +28,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { ChatModule } from './chat/chat.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { AdminModule } from './admin/admin.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -47,5 +48,9 @@ import { AdminModule } from './admin/admin.module';
     ComplaintsModule,
     AdminModule,
   ],
+
+  controllers: [
+    AppController
+  ]
 })
 export class AppModule {}
