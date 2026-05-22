@@ -13,3 +13,6 @@ cmds = ["npm run build", "npx prisma generate"]
 
 [start]
 cmd = "npx prisma migrate deploy && node dist/src/main"
+
+[healthcheck]
+enabled = false
