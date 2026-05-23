@@ -10,7 +10,7 @@ class ApiService {
   // Untuk Android emulator: 10.0.2.2
   // Untuk iOS simulator: localhost
   // Untuk device fisik: IP komputer kamu (cth: 192.168.1.5)
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  static const String baseUrl = 'https://binusmarketplace.up.railway.app/api';
 
   static final _storage = const FlutterSecureStorage();
 

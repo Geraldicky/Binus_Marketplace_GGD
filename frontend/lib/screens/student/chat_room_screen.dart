@@ -71,7 +71,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final token = await ApiService.getToken();
     if (token == null) return;
 
-    const socketUrl = 'http://10.0.2.2:3000';
+    const socketUrl = 'https://binusmarketplace.up.railway.app';
 
     _socket = IO.io(
       socketUrl,
