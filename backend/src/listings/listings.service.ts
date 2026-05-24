@@ -75,7 +75,10 @@ export class ListingsService {
 
   async findMySellListings(sellerId: string) {
     const listings = await this.prisma.listing.findMany({
-      where: { sellerId },
+      where: { 
+        sellerId,
+        status: { not: 'INACTIVE' }, // Exclude deleted (INACTIVE) listings
+      },
       orderBy: { createdAt: 'desc' },
     });
     return listings.map(l => this.withParsedImages(l));

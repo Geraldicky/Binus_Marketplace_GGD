@@ -53,7 +53,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Hapus Listing?', style: TextStyle(fontWeight: FontWeight.w600)),
-        content: Text('Listing "${listing.title}" akan dihapus.', style: const TextStyle()),
+        content: Text('Listing "${listing.title}" akan dihapus permanen.', style: const TextStyle()),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
           ElevatedButton(
@@ -66,16 +66,44 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     );
 
     if (confirm != true) return;
+
     try {
+      // Optimistic update: remove from UI immediately
+      setState(() => _listings.removeWhere((l) => l.id == listing.id));
+      
+      // Make API call
       await ApiService.deleteListing(listing.id);
-      _load();
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Listing dihapus'), backgroundColor: AppColors.success),
+          const SnackBar(
+            content: Text('Listing berhasil dihapus'),
+            backgroundColor: AppColors.success,
+          ),
         );
       }
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      // Restore item if delete failed
+      setState(() => _listings.add(listing));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menghapus: ${e.message}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (e) {
+      // Restore item if unexpected error
+      setState(() => _listings.add(listing));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menghapus: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
