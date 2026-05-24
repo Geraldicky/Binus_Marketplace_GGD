@@ -1,3 +1,18 @@
+// Helper function untuk parse date dari database (handle format "2026-05-24 08:23:16" dan "2026-05-24T08:23:16")
+DateTime _parseDateFromJson(dynamic dateValue) {
+  if (dateValue == null) return DateTime.now();
+  
+  try {
+    final dateStr = dateValue.toString().trim();
+    // Convert "2026-05-24 08:23:16" to "2026-05-24T08:23:16" (ISO 8601 format)
+    final normalizedDate = dateStr.replaceAll(' ', 'T');
+    return DateTime.parse(normalizedDate);
+  } catch (e) {
+    print('Error parsing date "$dateValue": $e');
+    return DateTime.now();
+  }
+}
+
 // lib/models/user.model.dart
 class UserModel {
   final String id;
@@ -123,7 +138,7 @@ class ListingModel {
       stockLeft: json['stockLeft'] as int?,
       sellerId: json['sellerId'] as String? ?? '',
       seller: json['seller'] != null ? UserModel.fromJson(json['seller'] as Map<String, dynamic>) : null,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt: _parseDateFromJson(json['createdAt']),
     );
   }
 
@@ -204,16 +219,8 @@ class TransactionModel {
         ? double.parse(json['totalPrice'].toString())
         : price * quantity;
 
-    // Parse createdAt with error handling
-    DateTime parsedDate = DateTime.now();
-    try {
-      if (json['createdAt'] != null) {
-        parsedDate = DateTime.parse(json['createdAt']);
-      }
-    } catch (e) {
-      // Fallback to now() if date parsing fails
-      print('Error parsing createdAt: ${json['createdAt']} - $e');
-    }
+    // Parse createdAt with flexible format handling
+    final parsedDate = _parseDateFromJson(json['createdAt']);
 
     return TransactionModel(
       id: json['id'] as String? ?? '',
@@ -287,7 +294,7 @@ class ReviewModel {
       reviewer: json['reviewer'] != null ? UserModel.fromJson(json['reviewer']) : null,
       rating: json['rating'],
       comment: json['comment'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: _parseDateFromJson(json['createdAt']),
     );
   }
 }
@@ -322,7 +329,7 @@ class MessageModel {
       sender: json['sender'] != null ? UserModel.fromJson(json['sender'] as Map<String, dynamic>) : null,
       content: json['content'] as String? ?? '',
       isRead: json['isRead'] as bool? ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt: _parseDateFromJson(json['createdAt']),
       isPending: false,
     );
   }
