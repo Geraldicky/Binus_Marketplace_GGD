@@ -5,21 +5,32 @@ import { randomBytes } from 'crypto';
 
 @Injectable()
 export class UploadService {
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient | null = null;
   private bucketName = 'marketplace-images';
 
   constructor() {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('⚠️  Supabase credentials not configured. Image uploads will fail.');
+    if (supabaseUrl && supabaseAnonKey) {
+      try {
+        this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+      } catch (error) {
+        console.warn('⚠️  Failed to initialize Supabase client:', error.message);
+        this.supabase = null;
+      }
+    } else {
+      console.warn('⚠️  Supabase credentials not configured. Image uploads will be disabled.');
     }
-
-    this.supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
   }
 
   async saveFile(file: Express.Multer.File): Promise<string> {
+    if (!this.supabase) {
+      throw new BadRequestException(
+        'Upload service tidak tersedia. Admin perlu configure Supabase credentials di Railway.'
+      );
+    }
+
     if (!file) {
       throw new BadRequestException('File tidak ada.');
     }
