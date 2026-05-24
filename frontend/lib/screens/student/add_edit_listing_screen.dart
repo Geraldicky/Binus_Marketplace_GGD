@@ -1,7 +1,9 @@
 // lib/screens/student/add_edit_listing_screen.dart
 // UC-003: Tambah / Edit Listing
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -25,6 +27,8 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
   String _selectedType = 'PRODUCT';
   String? _selectedCondition;
   bool _isSaving = false;
+  List<File> _selectedImages = [];
+  final _imagePicker = ImagePicker();
 
   bool get _isEditing => widget.listing != null;
 
@@ -70,11 +74,84 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          if (_selectedImages.length < 5) {
+            _selectedImages.add(File(pickedFile.path));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Maksimal 5 foto per listing'),
+                backgroundColor: AppColors.warning,
+              ),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memilih foto: ${e.toString()}'), backgroundColor: AppColors.error),
+      );
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
+      if (pickedFile != null) {
+        setState(() {
+          if (_selectedImages.length < 5) {
+            _selectedImages.add(File(pickedFile.path));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Maksimal 5 foto per listing'),
+                backgroundColor: AppColors.warning,
+              ),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengambil foto: ${e.toString()}'), backgroundColor: AppColors.error),
+      );
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
     try {
+      List<String> imageUrls = [];
+      
+      // Upload selected images
+      if (_selectedImages.isNotEmpty) {
+        try {
+          imageUrls = await ApiService.uploadImages(
+            _selectedImages.map((f) => f.path).toList(),
+          );
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Gagal upload gambar: ${e.toString()}'), backgroundColor: AppColors.error),
+            );
+          }
+          setState(() => _isSaving = false);
+          return;
+        }
+      }
+
       final data = {
         'title': _titleCtrl.text.trim(),
         'description': _descCtrl.text.trim(),
@@ -85,7 +162,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
           'condition': _selectedCondition,
         if (_selectedType == 'PRODUCT' && _stockCtrl.text.isNotEmpty)
           'stock': int.parse(_stockCtrl.text),
-        'images': <String>[],
+        'images': imageUrls,
       };
 
       if (_isEditing) {
@@ -230,6 +307,129 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
                 ),
                 validator: (v) => (v == null || v.trim().length < 10) ? 'Deskripsi minimal 10 karakter' : null,
               ),
+              const SizedBox(height: 24),
+
+              // ── Foto Produk ───────────────────
+              Text('Foto Produk', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 10),
+              
+              // Display selected images
+              if (_selectedImages.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: _selectedImages.length,
+                      itemBuilder: (_, index) {
+                        return Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: FileImage(_selectedImages[index]),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: GestureDetector(
+                                onTap: () => _removeImage(index),
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    if (_selectedImages.length < 5)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _pickImage,
+                              icon: const Icon(Icons.image_outlined),
+                              label: const Text('Galeri'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _takePhoto,
+                              icon: const Icon(Icons.camera_alt_outlined),
+                              label: const Text('Kamera'),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                )
+              else
+                Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.grey300, style: BorderStyle.solid),
+                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.grey100,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.image_outlined, size: 48, color: AppColors.grey400),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Tambahkan foto produk kamu',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Maksimal 5 foto',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.grey500),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _pickImage,
+                            icon: const Icon(Icons.image_outlined),
+                            label: const Text('Pilih dari Galeri'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _takePhoto,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('Ambil Foto'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               const SizedBox(height: 32),
 
               // ── Save Button ───────────────────

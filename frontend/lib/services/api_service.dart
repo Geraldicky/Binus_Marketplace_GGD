@@ -2,6 +2,7 @@
 // Semua panggilan HTTP ke backend
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -364,6 +365,54 @@ class ApiService {
       body: jsonEncode({'status': status, if (adminNote != null) 'adminNote': adminNote}),
     );
     return _parseResponse(res);
+  }
+
+  // ─────────────────────────────────────────────
+  // FILE UPLOAD
+  // ─────────────────────────────────────────────
+  static Future<List<String>> uploadImages(List<String> imagePaths) async {
+    try {
+      final uploadedUrls = <String>[];
+      
+      for (final imagePath in imagePaths) {
+        final file = http.MultipartFile(
+          'file',
+          http.ByteStream(Stream.fromIterable([await File(imagePath).readAsBytes()])),
+          (await File(imagePath).length()),
+          filename: imagePath.split('/').last,
+        );
+        
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('$baseUrl/upload'),
+        );
+        
+        final headers = await _headers(auth: true);
+        request.headers.addAll(headers);
+        request.files.add(file);
+        
+        final response = await request.send();
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final responseBody = await response.stream.bytesToString();
+          final data = jsonDecode(responseBody);
+          if (data['url'] != null) {
+            uploadedUrls.add(data['url']);
+          }
+        } else {
+          throw ApiException(
+            message: 'Gagal upload gambar',
+            statusCode: response.statusCode,
+          );
+        }
+      }
+      
+      return uploadedUrls;
+    } catch (e) {
+      throw ApiException(
+        message: 'Error upload gambar: ${e.toString()}',
+        statusCode: 500,
+      );
+    }
   }
 }
 

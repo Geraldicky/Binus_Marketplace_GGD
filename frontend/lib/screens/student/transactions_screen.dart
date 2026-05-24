@@ -46,8 +46,16 @@ class _TransactionsScreenState extends State<TransactionsScreen> with SingleTick
         _selling = (resSelling['data'] as List).map((e) => TransactionModel.fromJson(e)).toList();
         _isLoading = false;
       });
-    } catch (_) {
+    } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memuat transaksi: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -57,6 +65,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> with SingleTick
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Transaksi'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _load,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
