@@ -1,8 +1,8 @@
 // lib/screens/student/add_edit_listing_screen.dart
 // UC-003: Tambah / Edit Listing
 
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import '../../models/models.dart';
 import '../../services/api_service.dart';
@@ -27,7 +27,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
   String _selectedType = 'PRODUCT';
   String? _selectedCondition;
   bool _isSaving = false;
-  List<File> _selectedImages = [];
+  List<XFile> _selectedImages = [];
   final _imagePicker = ImagePicker();
 
   bool get _isEditing => widget.listing != null;
@@ -138,9 +138,8 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
       // Upload selected images
       if (_selectedImages.isNotEmpty) {
         try {
-          imageUrls = await ApiService.uploadImages(
-            _selectedImages.map((f) => f.path).toList(),
-          );
+          final imagePaths = _selectedImages.map((xf) => xf.path).toList();
+          imageUrls = await ApiService.uploadImages(imagePaths, selectedXFiles: _selectedImages);
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -328,15 +327,30 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
                       ),
                       itemCount: _selectedImages.length,
                       itemBuilder: (_, index) {
+                        final xFile = _selectedImages[index];
                         return Stack(
                           children: [
                             Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
-                                image: DecorationImage(
-                                  image: FileImage(_selectedImages[index]),
-                                  fit: BoxFit.cover,
-                                ),
+                                color: AppColors.grey100,
+                              ),
+                              child: FutureBuilder<Uint8List>(
+                                future: xFile.readAsBytes(),
+                                builder: (_, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Image.memory(
+                                      snapshot.data!,
+                                      fit: BoxFit.cover,
+                                    );
+                                  }
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             Positioned(

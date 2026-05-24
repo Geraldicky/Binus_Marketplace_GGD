@@ -4,6 +4,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
@@ -370,44 +371,96 @@ class ApiService {
   // ─────────────────────────────────────────────
   // FILE UPLOAD
   // ─────────────────────────────────────────────
-  static Future<List<String>> uploadImages(List<String> imagePaths) async {
+  static Future<List<String>> uploadImages(
+    List<String> imagePaths, {
+    List<XFile>? selectedXFiles,
+  }) async {
     try {
       final uploadedUrls = <String>[];
       
-      for (final imagePath in imagePaths) {
-        final file = http.MultipartFile(
-          'file',
-          http.ByteStream(Stream.fromIterable([await File(imagePath).readAsBytes()])),
-          (await File(imagePath).length()),
-          filename: imagePath.split('/').last,
-        );
-        
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse('$baseUrl/upload'),
-        );
-        
-        final headers = await _headers(auth: true);
-        request.headers.addAll(headers);
-        request.files.add(file);
-        
-        final response = await request.send();
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          final responseBody = await response.stream.bytesToString();
-          final data = jsonDecode(responseBody);
-          if (data['url'] != null) {
-            uploadedUrls.add(data['url']);
-          }
-        } else {
-          throw ApiException(
-            message: 'Gagal upload gambar',
-            statusCode: response.statusCode,
+      // Gunakan XFile jika tersedia (untuk web compatibility)
+      if (selectedXFiles != null && selectedXFiles.isNotEmpty) {
+        for (final xFile in selectedXFiles) {
+          final bytes = await xFile.readAsBytes();
+          final filename = xFile.name;
+          
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse('$baseUrl/upload'),
           );
+          
+          final headers = await _headers(auth: true);
+          request.headers.addAll(headers);
+          
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'file',
+              bytes,
+              filename: filename,
+            ),
+          );
+          
+          final response = await request.send();
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            final responseBody = await response.stream.bytesToString();
+            final data = jsonDecode(responseBody);
+            if (data['url'] != null) {
+              uploadedUrls.add(data['url']);
+            }
+          } else {
+            throw ApiException(
+              message: 'Gagal upload gambar ${xFile.name}',
+              statusCode: response.statusCode,
+            );
+          }
+        }
+      } else {
+        // Fallback untuk mobile/desktop dengan path
+        for (final imagePath in imagePaths) {
+          final file = File(imagePath);
+          if (!await file.exists()) {
+            throw ApiException(
+              message: 'File tidak ditemukan: $imagePath',
+              statusCode: 404,
+            );
+          }
+          
+          final request = http.MultipartRequest(
+            'POST',
+            Uri.parse('$baseUrl/upload'),
+          );
+          
+          final headers = await _headers(auth: true);
+          request.headers.addAll(headers);
+          
+          final bytes = await file.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'file',
+              bytes,
+              filename: imagePath.split('/').last,
+            ),
+          );
+          
+          final response = await request.send();
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            final responseBody = await response.stream.bytesToString();
+            final data = jsonDecode(responseBody);
+            if (data['url'] != null) {
+              uploadedUrls.add(data['url']);
+            }
+          } else {
+            throw ApiException(
+              message: 'Gagal upload gambar',
+              statusCode: response.statusCode,
+            );
+          }
         }
       }
       
       return uploadedUrls;
     } catch (e) {
+      if (e is ApiException) rethrow;
       throw ApiException(
         message: 'Error upload gambar: ${e.toString()}',
         statusCode: 500,
