@@ -195,7 +195,74 @@ class _ModerateCard extends StatelessWidget {
               _Badge(label: listing.categoryLabel, color: AppColors.grey600),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+
+          // Images carousel
+          if (listing.images.isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 160,
+                color: AppColors.grey100,
+                child: Stack(
+                  children: [
+                    Image.network(
+                      listing.images.first,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 160,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.grey200,
+                        child: const Icon(Icons.image_not_supported_rounded, color: AppColors.grey500),
+                      ),
+                    ),
+                    if (listing.images.length > 1)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '+${listing.images.length - 1}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppColors.grey100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.image_not_supported_rounded, size: 40, color: AppColors.grey400),
+                    SizedBox(height: 8),
+                    Text(
+                      'Tidak ada gambar',
+                      style: TextStyle(color: AppColors.grey500, fontFamily: 'Poppins'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 12),
 
           // Judul
           Text(listing.title, style: Theme.of(context).textTheme.titleMedium),
