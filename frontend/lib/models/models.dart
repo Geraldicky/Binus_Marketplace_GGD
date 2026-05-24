@@ -204,6 +204,17 @@ class TransactionModel {
         ? double.parse(json['totalPrice'].toString())
         : price * quantity;
 
+    // Parse createdAt with error handling
+    DateTime parsedDate = DateTime.now();
+    try {
+      if (json['createdAt'] != null) {
+        parsedDate = DateTime.parse(json['createdAt']);
+      }
+    } catch (e) {
+      // Fallback to now() if date parsing fails
+      print('Error parsing createdAt: ${json['createdAt']} - $e');
+    }
+
     return TransactionModel(
       id: json['id'] as String? ?? '',
       listingId: json['listingId'] as String? ?? '',
@@ -224,8 +235,7 @@ class TransactionModel {
       sellerReceives: json['sellerReceives'] != null
           ? double.parse(json['sellerReceives'].toString()) : null,
       isEscrowHeld: json['isEscrowHeld'] as bool? ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt: parsedDate,
       review: json['review'] != null ? ReviewModel.fromJson(json['review']) : null,
     );
   }

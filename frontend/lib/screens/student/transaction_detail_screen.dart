@@ -361,12 +361,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     const Divider(height: 12),
                   ],
                   _PriceRow(label: t.quantity > 1 ? 'Subtotal' : 'Harga', value: FormatUtils.currency(t.totalPrice)),
-                  _PriceRow(
-                    label: 'Komisi (${t.commissionRate?.toStringAsFixed(1) ?? '5.0'}%)',
-                    value: '- ${FormatUtils.currency(t.commissionAmt ?? 0)}',
-                    color: AppColors.error,
-                  ),
-                  const Divider(height: 16),
+                  // Komisi hanya ditampilkan untuk penjual (seller)
+                  if (!widget.isBuyer) ...[
+                    _PriceRow(
+                      label: 'Komisi (${t.commissionRate?.toStringAsFixed(1) ?? '5.0'}%)',
+                      value: '- ${FormatUtils.currency(t.commissionAmt ?? 0)}',
+                      color: AppColors.error,
+                    ),
+                    const Divider(height: 16),
+                  ],
                   _PriceRow(
                     label: widget.isBuyer ? 'Total Bayar' : 'Kamu Terima',
                     value: FormatUtils.currency(widget.isBuyer ? t.totalPrice : (t.sellerReceives ?? t.totalPrice)),
@@ -647,10 +650,29 @@ class _ReviewSheetState extends State<_ReviewSheet> {
         rating: _rating,
         comment: _commentCtrl.text.trim().isNotEmpty ? _commentCtrl.text.trim() : null,
       );
+      
+      // Reload transaction to get updated review data
+      await Future.delayed(const Duration(milliseconds: 500));
       widget.onSubmitted();
-      if (mounted) Navigator.of(context).pop();
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Review berhasil dikirim!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message), backgroundColor: AppColors.error));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
