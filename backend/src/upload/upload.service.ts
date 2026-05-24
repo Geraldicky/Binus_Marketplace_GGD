@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Express } from 'express';
+import { Express, Request } from 'express';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
@@ -8,7 +8,7 @@ import { randomBytes } from 'crypto';
 export class UploadService {
   private uploadDir = join(process.cwd(), 'uploads');
 
-  async saveFile(file: Express.Multer.File): Promise<string> {
+  async saveFile(file: Express.Multer.File, req: Request): Promise<string> {
     if (!file) {
       throw new BadRequestException('File tidak ada.');
     }
@@ -39,8 +39,15 @@ export class UploadService {
       const filePath = join(this.uploadDir, filename);
       await fs.writeFile(filePath, file.buffer);
 
-      // Return public URL (sesuaikan dengan domain kamu)
-      const baseUrl = process.env.FILE_URL || 'http://localhost:3000';
+      // Build base URL dari request origin atau host
+      let baseUrl = process.env.FILE_URL;
+      if (!baseUrl) {
+        // Get protocol and host dari request
+        const protocol = req.protocol || 'https';
+        const host = req.get('host') || 'localhost:3000';
+        baseUrl = `${protocol}://${host}`;
+      }
+      
       return `${baseUrl}/uploads/${filename}`;
     } catch (error) {
       throw new BadRequestException(`Gagal menyimpan file: ${error.message}`);
