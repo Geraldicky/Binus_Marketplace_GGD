@@ -19,8 +19,6 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -37,12 +35,6 @@ import { AppController } from './app.controller';
   imports: [
     // Load .env otomatis ke seluruh aplikasi
     ConfigModule.forRoot({ isGlobal: true }),
-
-    // Serve static files from uploads directory
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
-    }),
 
     // Database — @Global, tidak perlu import ulang di module lain
     PrismaModule,

@@ -1,14 +1,25 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Express, Request } from 'express';
-import { promises as fs } from 'fs';
-import { join } from 'path';
+import { Express } from 'express';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
 
 @Injectable()
 export class UploadService {
-  private uploadDir = join(process.cwd(), 'uploads');
+  private supabase: SupabaseClient;
+  private bucketName = 'marketplace-images';
 
-  async saveFile(file: Express.Multer.File, req: Request): Promise<string> {
+  constructor() {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('⚠️  Supabase credentials not configured. Image uploads will fail.');
+    }
+
+    this.supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+  }
+
+  async saveFile(file: Express.Multer.File): Promise<string> {
     if (!file) {
       throw new BadRequestException('File tidak ada.');
     }
@@ -26,30 +37,39 @@ export class UploadService {
     }
 
     try {
-      // Buat direktori uploads jika belum ada
-      await fs.mkdir(this.uploadDir, { recursive: true });
-
       // Generate unique filename
       const timestamp = Date.now();
       const random = randomBytes(8).toString('hex');
       const ext = file.originalname.split('.').pop();
       const filename = `${timestamp}-${random}.${ext}`;
+      const filepath = `images/${filename}`;
 
-      // Simpan file
-      const filePath = join(this.uploadDir, filename);
-      await fs.writeFile(filePath, file.buffer);
+      // Upload ke Supabase Storage
+      const { error, data } = await this.supabase.storage
+        .from(this.bucketName)
+        .upload(filepath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
 
-      // Build base URL dari request origin atau host
-      let baseUrl = process.env.FILE_URL;
-      if (!baseUrl) {
-        // Get protocol and host dari request
-        const protocol = req.protocol || 'https';
-        const host = req.get('host') || 'localhost:3000';
-        baseUrl = `${protocol}://${host}`;
+      if (error) {
+        console.error('Supabase upload error:', error);
+        throw new BadRequestException(`Gagal upload file: ${error.message}`);
       }
-      
-      return `${baseUrl}/uploads/${filename}`;
+
+      // Get public URL
+      const { data: publicUrlData } = this.supabase.storage
+        .from(this.bucketName)
+        .getPublicUrl(filepath);
+
+      if (!publicUrlData?.publicUrl) {
+        throw new BadRequestException('Gagal menghasilkan URL publik.');
+      }
+
+      return publicUrlData.publicUrl;
     } catch (error) {
+      console.error('Upload error:', error);
+      if (error instanceof BadRequestException) throw error;
       throw new BadRequestException(`Gagal menyimpan file: ${error.message}`);
     }
   }

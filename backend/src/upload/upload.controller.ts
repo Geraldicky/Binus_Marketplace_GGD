@@ -1,6 +1,6 @@
-import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express, Request } from 'express';
+import { Express } from 'express';
 import { UploadService } from './upload.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
@@ -16,7 +16,7 @@ export class UploadController {
       fileSize: 5 * 1024 * 1024, // 5MB
     },
   }))
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     console.log('Upload request received:', {
       filename: file?.originalname,
       mimetype: file?.mimetype,
@@ -28,7 +28,7 @@ export class UploadController {
     }
 
     try {
-      const url = await this.uploadService.saveFile(file, req);
+      const url = await this.uploadService.saveFile(file);
       return {
         success: true,
         message: 'File berhasil diupload.',
