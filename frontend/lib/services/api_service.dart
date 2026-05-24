@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -389,11 +390,31 @@ class ApiService {
           request.headers['Authorization'] = 'Bearer $token';
         }
         
+        // Detect MIME type dari extension
+        String mimeType = 'application/octet-stream';
+        final ext = filename.split('.').last.toLowerCase();
+        switch (ext) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            break;
+          case 'gif':
+            mimeType = 'image/gif';
+            break;
+        }
+        
         request.files.add(
           http.MultipartFile.fromBytes(
             'file',
             bytes,
             filename: filename,
+            contentType: MediaType.parse(mimeType),
           ),
         );
         
