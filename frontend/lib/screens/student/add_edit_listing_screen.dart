@@ -138,7 +138,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
       // Upload selected images
       if (_selectedImages.isNotEmpty) {
         try {
-          imageUrls = await ApiService.uploadImages([], selectedXFiles: _selectedImages);
+          imageUrls = await ApiService.uploadImages(_selectedImages);
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
