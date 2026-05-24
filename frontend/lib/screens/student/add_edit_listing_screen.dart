@@ -80,7 +80,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
       if (pickedFile != null) {
         setState(() {
           if (_selectedImages.length < 5) {
-            _selectedImages.add(File(pickedFile.path));
+            _selectedImages.add(pickedFile);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -104,7 +104,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
       if (pickedFile != null) {
         setState(() {
           if (_selectedImages.length < 5) {
-            _selectedImages.add(File(pickedFile.path));
+            _selectedImages.add(pickedFile);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -138,8 +138,7 @@ class _AddEditListingScreenState extends State<AddEditListingScreen> {
       // Upload selected images
       if (_selectedImages.isNotEmpty) {
         try {
-          final imagePaths = _selectedImages.map((xf) => xf.path).toList();
-          imageUrls = await ApiService.uploadImages(imagePaths, selectedXFiles: _selectedImages);
+          imageUrls = await ApiService.uploadImages([], selectedXFiles: _selectedImages);
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
