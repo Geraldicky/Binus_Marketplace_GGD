@@ -13,6 +13,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/student/main_nav_screen.dart';
 import 'screens/admin/admin_main_screen.dart';
+import 'widgets/mobile_web_frame.dart';
 
 void main() async {
   // Wajib dipanggil sebelum menggunakan plugin/async di main
@@ -41,11 +42,16 @@ class BinusMarketplaceApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
 
-      // Localization: paksa app pakai bahasa Indonesia
+      builder: (context, child) {
+        return MobileWebFrame(
+          child: child ?? const SizedBox(),
+        );
+      },
+
       locale: const Locale('id', 'ID'),
       supportedLocales: const [
-        Locale('id', 'ID'), // Indonesia
-        Locale('en', 'US'), // English fallback
+        Locale('id', 'ID'),
+        Locale('en', 'US'),
       ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
